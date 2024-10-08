@@ -65,6 +65,7 @@ model Content {
   parent           Content?        @relation("ContentToContent", fields: [parentId], references: [id])
   children         Content[]       @relation("ContentToContent")
   courses          CourseContent[]
+  notionMetadataId Int?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
@@ -77,6 +78,7 @@ model CourseContent {
 
   @@id([courseId, contentId])
 }
+
 
 model UsersPurchases {
   Users      Users    @relation(fields: [UsersId], references: [id])
@@ -96,3 +98,4 @@ model Certificate {
   UsersId    Int
   issuedAt  DateTime @default(now())
 }
+
