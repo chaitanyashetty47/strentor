@@ -1,8 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient,SupabaseClient } from '@supabase/supabase-js';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import jwksRsa from 'jwks-rsa';
 
-const supabase = createClient('SUPABASE_PROJECT_URL', 'SUPABASE_API_KEY');
+const supabase: SupabaseClient = createClient(
+  process.env.SUPABASE_PROJECT_URL!,
+  process.env.SUPABASE_API_KEY!
+)
 
 export const authMiddleware = expressjwt({
   secret: jwksRsa.expressJwtSecret({

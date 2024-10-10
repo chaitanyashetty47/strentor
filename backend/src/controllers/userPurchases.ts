@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export const joinCourse = async (req: Request, res: Response) => {
   try {
     const { courseId } = req.params;
-    const userId = (req as any).user?.id; // Assuming user ID is available in the request
+    const userId = req.user?.id; // Assuming user ID is available in the request
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -27,7 +27,7 @@ export const joinCourse = async (req: Request, res: Response) => {
     const existingPurchase = await prisma.usersPurchases.findUnique({
       where: {
         UsersId_courseId: {
-          UsersId: userId,
+          UsersId: parseInt(userId),
           courseId: parseInt(courseId)
         }
       }
@@ -40,7 +40,7 @@ export const joinCourse = async (req: Request, res: Response) => {
     // Create a new purchase record
     const purchase = await prisma.usersPurchases.create({
       data: {
-        UsersId: userId,
+        UsersId: parseInt(userId),
         courseId: parseInt(courseId)
       }
     });

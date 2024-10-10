@@ -1,34 +1,52 @@
 import { Request, Response } from 'express';
 import { PrismaClient, Role } from '@prisma/client';
 
+// declare global {
+//   namespace Express {
+//       interface Request {
+//           user?: {
+//               id: string;
+//               role:Role // Adjust the type as necessary
+//               // Add other user properties if needed
+//           };
+//       }
+//   }
+// }
+
 declare global {
   namespace Express {
-      interface Request {
-          user?: {
-              id: string;
-              role:Role // Adjust the type as necessary
-              // Add other user properties if needed
-          };
-      }
+    interface Request {
+      user?: {
+        id: number;
+        supabaseId: string;
+        email: string;
+        name: string;
+        role: Role;
+      } ;
+    }
   }
 }
+
 
 const prisma = new PrismaClient();
 
 // Create a new course (Tutor or Admin only)
-export const createCourse = async (req: Request, res: Response) => {
+export const createCourse = async (req: Request, res: Response):Promise<void> => {
   try {
     const { title, imageUrl, description, openToEveryone, slug, discordOauthUrl } = req.body;
     const createdById = req.user?.id;
 
     if (!createdById) {
-      return res.status(401).json({ error: 'User not authenticated' });
+      res.status(401).json({ error: 'User not authenticated' });
+      return ;
     }
 
-    const createdByIdNumber = parseInt(createdById as string, 10);
-
+   // const createdByIdNumber = parseInt(createdById as string, 10);
+   
+   const createdByIdNumber = createdById
     if (isNaN(createdByIdNumber)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+      res.status(400).json({ error: 'Invalid user ID' });
+      return;
     }
 
     const course = await prisma.course.create({
