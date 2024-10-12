@@ -5,6 +5,7 @@ import Auth from './pages/Login';
 import { Skeleton } from './components/Skeleton';
 import Home from './pages/Home';
 import { UserProvider } from '@/hooks/useUser';
+import Course from './pages/Course';
 
 
 
@@ -91,9 +92,12 @@ export default function App() {
           {/* Public route */}
           <Route path="/" element={<AuthWrapper />} />
 
+
           {/* Protected routes */}
           <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
             <Route path="/home" element={<Home />} />
+            <Route path="/course" element={<Course />} />
+
           </Route>
 
           {/* Catch-all route */}
