@@ -6,6 +6,9 @@ import { Skeleton } from './components/Skeleton';
 import Home from './pages/Home';
 import { UserProvider } from '@/hooks/useUser';
 import Course from './pages/Course';
+import CourseContentDropdown from './pages/Content';
+import CourseCard from './pages/Content2'
+import CoursePage from './pages/CourseDetail'
 
 
 
@@ -97,6 +100,9 @@ export default function App() {
           <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
             <Route path="/home" element={<Home />} />
             <Route path="/course" element={<Course />} />
+            <Route path="/content" element={<CourseContentDropdown />} />
+            <Route path="/card" element={<CourseCard title="Your Title" subtitle="Your Subtitle" isBookmarked={false} />} />
+            <Route path="/detail" element={<CoursePage />} />
 
           </Route>
 

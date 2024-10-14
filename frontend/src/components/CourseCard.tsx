@@ -3,6 +3,7 @@ import { Card } from "./ui/card";
 import { Star } from "lucide-react";
 import turfImg from "../assets/turf-img.png";
 
+
 export default function CourseCard() {
   const rating = 4; // This could be a prop or state
 
