@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(setUserMiddleware);
 app.use('/users', userRoutes);
 app.use('/course', courseRoutes)
-app.use('purchases',userPurchasesRoutes)
+app.use('/purchases',userPurchasesRoutes)
 app.use('/content',contentRoutes)
 
 

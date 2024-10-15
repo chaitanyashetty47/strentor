@@ -8,6 +8,7 @@ const supabase: SupabaseClient = createClient(
 
 interface UserContextType {
   user: User | null;
+  accessToken: string | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   logout: () => Promise<void>;
 }
@@ -16,16 +17,20 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null); // Declare accessToken state
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      const { data: { session } } = await supabase.auth.getSession(); // Fetch session
+      setUser(session?.user ?? null); // Set user
+      setAccessToken(session?.access_token ?? null); // Set access token
     };
+
     fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      setUser(session?.user ?? null); // Set user
+      setAccessToken(session?.access_token ?? null); // Set access token
     });
 
     return () => {
@@ -36,10 +41,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setAccessToken(null); // Clear access token on logout
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout }}>
+    <UserContext.Provider value={{ user, accessToken, setUser, logout }}>
       {children}
     </UserContext.Provider>
   );

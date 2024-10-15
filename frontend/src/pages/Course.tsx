@@ -38,7 +38,7 @@ export default function Course() {
           <img
             src={bgImg}
             alt="Background"
-            className="w-full h-full object-cover opacity-50"
+            className="w-full  object-cover opacity-50"
           />
         </div>
 

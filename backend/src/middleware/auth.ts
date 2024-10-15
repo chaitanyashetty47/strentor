@@ -20,24 +20,39 @@ export const authMiddleware = expressjwt({
 });
 
 export const setUserMiddleware = async (req: any, res: any, next: any) => {
-  if (req.auth?.sub) {
+  const authHeader = req.headers['authorization'];
+  
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7); // Remove 'Bearer ' from the start
+    
     try {
-      const { data: user, error } = await supabase
-        .from('Users')
-        .select('*')
-        .eq('supabaseId', req.auth.sub)
-        .single();
+      // Verify the token and get user info
+      const { data: { user }, error } = await supabase.auth.getUser(token);
 
       if (error) throw error;
 
-      req.user = {
-        ...user,
-        id: parseInt(user.id, 10) // Ensure id is a number
-      };
-      
+      if (user) {
+        console.log("user info",user);
+        const { data: userData, error: userError } = await supabase
+          .from('Users')
+          .select('*')
+          .eq('supabaseId', user.id)
+          .single();
+
+        if (userError) throw userError;
+
+        // Combine Supabase user data with your custom user data
+        req.user = {
+          id: parseInt(userData.id, 10), // Ensure id is a number
+          email: user.email,
+        };
+
+        console.log("User is: ", req.user);
+      }
     } catch (error) {
       console.error('Error fetching user:', error);
     }
   }
+
   next();
 };

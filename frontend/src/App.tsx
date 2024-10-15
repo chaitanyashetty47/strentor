@@ -99,7 +99,7 @@ export default function App() {
           {/* Protected routes */}
           <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
             <Route path="/home" element={<Home />} />
-            <Route path="/course" element={<Course />} />
+            <Route path="/course/:playgroundName/:playgroundId" element={<Course />} />
             <Route path="/content" element={<CourseContentDropdown />} />
             <Route path="/card" element={<CourseCard title="Your Title" subtitle="Your Subtitle" isBookmarked={false} />} />
             <Route path="/detail" element={<CoursePage />} />

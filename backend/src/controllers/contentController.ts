@@ -202,7 +202,7 @@ export const updateContent = async (req: Request, res: Response): Promise<void> 
 // Delete content by ID
 
 
-export const deleteContent = async (req: Request, res: Response): Promise<void> => {
+export const deleteContent = async (req: Request, res: Response): Promise<void> => { 
   try {
     const { contentId } = req.params;
 
@@ -216,15 +216,35 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Extract the public_id from the Cloudinary URL (assuming the thumbnail is stored)
+    // Extract the public_id from the Cloudinary URL (including the folder structure)
     const cloudinaryUrl = content.thumbnail;
-    const publicId = cloudinaryUrl?.split('/').slice(-1)[0].split('.')[0]; // Extract the public_id
+    // console.log("cloudinary URL: ", cloudinaryUrl);
+    
+    // Extract the folder path and filename from the Cloudinary URL
+    const publicId = cloudinaryUrl
+      ?.split('/')
+      .slice(-4) // This will capture 'courses/2/3/filename'
+      .join('/')
+      .split('.')[0]; // Remove the file extension (e.g., .mp4)
+
+    // console.log("Public ID: ", publicId);
+
+    if(!publicId){
+      console.error("Error deleting video file from Cloudinary as id cannot be retreived");
+        res.status(500).json({ error: 'Error deleting files from Cloudinary as id cant be retrieved' });
+    }
 
     // Delete the file from Cloudinary
-    await cloudinary.uploader.destroy(publicId!, (error, result) => {
+    await cloudinary.uploader.destroy(publicId!, { resource_type: "video" }, (error, result) => {
       if (error) {
         console.error('Cloudinary deletion error:', error);
         res.status(500).json({ error: 'Error deleting content from Cloudinary.' });
+        return;
+      }
+
+      if (!result || result.result !== 'ok') {
+        console.error("Error deleting video file from Cloudinary");
+        res.status(500).json({ error: 'Error deleting files from Cloudinary' });
         return;
       }
 
@@ -245,4 +265,5 @@ export const deleteContent = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'An error occurred while deleting the content.' });
   }
 };
+
 
