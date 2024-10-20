@@ -11,6 +11,7 @@ import AdminCourseCard from './pages/AdminCourse'
 import CoursePage from './pages/CourseDetail'
 import AdminCourseDetail from './pages/AdminCourseDetail';
 import AdminFolderDetail from './pages/AdminFolderDetail';
+import { RecoilRoot } from 'recoil';
 
 
 
@@ -93,6 +94,7 @@ const AuthWrapper = () => {
 export default function App() {
   return (
     <UserProvider>
+      <RecoilRoot>
       <Router>
         <Routes>
           {/* Public route */}
@@ -115,6 +117,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </RecoilRoot>
     </UserProvider>
   );
 }

@@ -5,6 +5,9 @@ import { Video, FileText, Folder } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import axios from 'axios';
 
+import { useRecoilState } from 'recoil';
+import { selectedVideoState, VideoContent } from '../recoil/atoms';
+
 interface Content {
   id: number;
   type: string;
@@ -48,6 +51,16 @@ const CourseContentItem = ({ content }: { content: Content }) => (
 );
 
 const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
+
+  const [selectedVideo, setSelectedVideo] = useRecoilState(selectedVideoState);
+
+  const handleSelectContent = (content: VideoContent) => {
+    if (content.type === 'video') {
+      setSelectedVideo(content); // Update the selected video in Recoil
+    }
+  };
+  //changes above
+
   const { accessToken } = useUser();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -114,7 +127,14 @@ const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
             <AccordionContent>
               <div className="px-4 space-y-2">
                 {childrenMap[item.id]?.map((child) => (
-                  <CourseContentItem key={child.id} content={child} />
+                  // <CourseContentItem key={child.id} content={child} />
+                  <div
+                    key={child.id}
+                    onClick={() => handleSelectContent(child)}
+                  >
+                    <CourseContentItem content={child} />
+                  </div>
+
                 ))}
               </div>
             </AccordionContent>
