@@ -15,6 +15,7 @@ import AdminFolderDetail from './pages/AdminFolderDetail';
 
 
 
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -105,7 +106,7 @@ export default function App() {
             <Route path="/content" element={<CourseContentDropdown courseId={2} />} />
             <Route path="/admin/home" element={<AdminCourseCard />} />
             <Route path="/admin/course/:courseName/:courseId" element={<AdminCourseDetail />} />
-            <Route path="/admin/course/:courseId/folder/:folderTitle/:folderId" element={<AdminFolderDetail />} />
+            <Route path="/admin/course/:courseId/folder/:folderId" element={<AdminFolderDetail />} />
             <Route path="/detail" element={<CoursePage />} />
 
           </Route>

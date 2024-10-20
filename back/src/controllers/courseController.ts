@@ -119,3 +119,35 @@ export const getCourses = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch courses' });
   }
 };
+
+// Route to get course content, including sections and videos
+
+export const getContentOfCourse = async (req: Request, res: Response): Promise<void> =>{
+  const { courseId } = req.params;
+
+  try {
+    // Fetch course, sections, and their related content
+    const course = await prisma.course.findUnique({
+      where: { id: parseInt(courseId) },
+      include: {
+        content: {
+          include: {
+            content: true, // Include the related contents for each section
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      res.status(404).json({ message: 'Course not found' });
+      return;
+    }
+
+    res.json(course);
+    return;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+    return;
+  }
+};

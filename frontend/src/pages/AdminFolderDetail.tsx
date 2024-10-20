@@ -1,5 +1,5 @@
 import Header from "@/components/Header"
-import FolderCard from "@/components/FolderCard"
+import FolderCard from "@/components/SectionCard"
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/config";
 import { Folders } from "@/types/types";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UploadForm } from '@/components/UploadForm';
 import axios from "axios";
+import SectionCard from '../components/SectionCard';
 
 interface FolderCardProps {
   folder: Folders;
@@ -68,7 +69,7 @@ export default function AdminFolderDetail() {
       </Dialog>
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
         {folders.map((folder) => (
-          <FolderCard key={folder.id} folder={folder} />
+          <SectionCard key={folder.id} folder={folder} />
         ))}
       </div>
     </div>

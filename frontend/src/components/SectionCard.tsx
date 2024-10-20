@@ -16,10 +16,10 @@ interface FolderCardProps {
   onUpdate?: () => void;
 }
 
-export default function FolderCard({ folder, onDelete, onUpdate, courseId }: FolderCardProps) {
+export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const {accessToken} = useUser();
-  // const {courseId} = useParams();
+  //const {courseId} = useParams();
 
   const handleDelete = async () => {
     try {
@@ -39,8 +39,8 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
   };
 
   return (
-    <Card className="w-full max-w-sm bg-blue-600 text-white overflow-hidden ">
-      <Link to = {`/admin/course/${courseId}/folder/${folder.id}`} >
+    <Card className="w-full max-w-sm bg-blue-600 text-white overflow-hidden">
+      {/* <Link to = {`/course/${course.title}/${course.id}`} > */}
       <CardContent className="p-6 relative">
         <div className="absolute top-0 right-0 left-0 h-16 bg-gradient-to-br from-white/20 to-transparent rounded-tr-lg" />
         <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-white/20 to-transparent rounded-bl-full" />
@@ -51,7 +51,7 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
           <p className="text-sm">{folder.description}</p>
         </div>
       </CardContent>
-      </Link>
+      {/* </Link> */}
       <div className="bg-blue-700 p-4 flex justify-between items-center">
         <Folder />
         

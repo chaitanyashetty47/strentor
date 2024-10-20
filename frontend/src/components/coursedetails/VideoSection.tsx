@@ -1,21 +1,65 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
+interface VideoContent {
+  id: number;
+  title: string;
+  thumbnail: string;
+  description: string;
+  type: string;
+}
 
-const VideoSection = () => {
+interface VideoSectionProps {
+  selectedVideoId: number | null;
+  onVideoLoad: (video: VideoContent) => void;
+}
+
+const VideoSection  = () => {
+  const [video, setVideo] = useState<VideoContent | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchVideo = async () => {
+      try {
+        const { data } = await axios.get<VideoContent>('http://localhost:3000/content/13');
+        setVideo(data);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVideo();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!video) {
+    return <div>No video found</div>;
+  }
+
   return (
-    <div className="bg-black">
-      <div className="max-w-6xl mx-auto aspect-video relative">
-        <img src="/api/placeholder/1280/720" alt="Course thumbnail" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <button className="bg-white rounded-full p-4 shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-            </svg>
-          </button>
-        </div>
-        <div className="absolute bottom-4 left-4 bg-gray-800 bg-opacity-75 text-white p-2 rounded">
-          <p className="font-bold">Jose Salvatierra</p>
-          <p className="text-sm">Founder of Teclado</p>
-        </div>
+    <div className="bg-transparent text-white rounded-xl p-4 mx-auto mt-8 shadow-lg max-w-6xl m-auto">
+      
+      {/* Video playback section */}
+      <div className="relative aspect-video mb-4">
+        <video className="w-full h-full object-cover rounded-lg" controls>
+          <source src={video.thumbnail} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      {/* Video description */}
+      <div className="bg-transparent text-black bg-opacity-90 text-xl p-4 rounded-lg">
+        <p>{video.description}</p>
       </div>
     </div>
   );
