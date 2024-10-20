@@ -1,5 +1,3 @@
-
-
 import { Star } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useParams } from 'react-router-dom';
@@ -7,7 +5,8 @@ import { usePurchases } from '@/hooks/usePurchases';
 
 
 export default function CourseDetails() {
-  const { user, loading, error } = usePurchases();
+  const { purchases, loading, error } = usePurchases();
+  const user = purchases;
   const { courseId } = useParams();
 
   const isEnrolled = () => {

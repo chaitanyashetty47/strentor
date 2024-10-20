@@ -7,8 +7,10 @@ import Home from './pages/Home';
 import { UserProvider } from '@/hooks/useUser';
 import Course from './pages/Course';
 import CourseContentDropdown from './pages/Content';
-import CourseCard from './pages/Content2'
+import AdminCourseCard from './pages/AdminCourse'
 import CoursePage from './pages/CourseDetail'
+import AdminCourseDetail from './pages/AdminCourseDetail';
+import AdminFolderDetail from './pages/AdminFolderDetail';
 
 
 
@@ -99,9 +101,11 @@ export default function App() {
           {/* Protected routes */}
           <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
             <Route path="/home" element={<Home />} />
-            <Route path="/course/:playgroundName/:playgroundId" element={<Course />} />
-            <Route path="/content" element={<CourseContentDropdown />} />
-            <Route path="/card" element={<CourseCard title="Your Title" subtitle="Your Subtitle" isBookmarked={false} />} />
+            <Route path="/course/:courseName/:courseId" element={<Course />} />
+            <Route path="/content" element={<CourseContentDropdown courseId={2} />} />
+            <Route path="/admin/home" element={<AdminCourseCard />} />
+            <Route path="/admin/course/:courseName/:courseId" element={<AdminCourseDetail />} />
+            <Route path="/admin/course/:courseId/folder/:folderTitle/:folderId" element={<AdminFolderDetail />} />
             <Route path="/detail" element={<CoursePage />} />
 
           </Route>

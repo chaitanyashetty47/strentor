@@ -7,3 +7,12 @@ export interface Courses{
   slug:string,
   
 }
+
+export interface Folders{
+  id:number,
+  type:string,
+  title:string,
+  hidden: boolean,
+  description: string,
+  thumbnail:string,
+}

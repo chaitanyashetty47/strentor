@@ -21,22 +21,30 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession(); // Fetch session
-      setUser(session?.user ?? null); // Set user
-      setAccessToken(session?.access_token ?? null); // Set access token
+      const { data: { session }, error } = await supabase.auth.getSession(); // Fetch session
+      if (error) console.error("Error fetching session:", error);
+      console.log("Fetched session: ", session);
+      setUser(session?.user ?? null);
+      setAccessToken(session?.access_token ?? null);
     };
 
     fetchUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null); // Set user
-      setAccessToken(session?.access_token ?? null); // Set access token
+      setUser(session?.user ?? null);
+      setAccessToken(session?.access_token ?? null);
     });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Only run on mount
+
+  // Log when user or accessToken changes
+  // useEffect(() => {
+  //   console.log("Updated user: ", user);
+  //   console.log("Updated access token: ", accessToken);
+  // }, [user, accessToken]); // Watch for user and accessToken changes
 
   const logout = async () => {
     await supabase.auth.signOut();
