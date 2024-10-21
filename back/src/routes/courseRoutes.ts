@@ -4,6 +4,8 @@ import {authMiddleware, isTutorOrAdmin} from '../middleware/checkRole';
 
 const router = express.Router();
 
+
+
 router.post('/create', authMiddleware ,isTutorOrAdmin, createCourse);
 router.put('/update/:id', authMiddleware ,isTutorOrAdmin, updateCourse);
 router.delete('/delete/:id', authMiddleware ,isTutorOrAdmin, deleteCourse);

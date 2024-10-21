@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
 import { Request, Response, NextFunction } from 'express'
 import { PrismaClient, Role } from '@prisma/client'
+import {supabase} from '../config/supabaseClient'
 
-const supabase = createClient(process.env.SUPABASE_PROJECT_URL!, process.env.SUPABASE_API_KEY!)
+// const supabase = createClient(process.env.SUPABASE_PROJECT_URL!, process.env.SUPABASE_API_KEY!)
 const prisma = new PrismaClient()
 
 declare global {

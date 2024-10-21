@@ -5,7 +5,7 @@ import { Video, FileText, Folder } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import axios from 'axios';
 
-import { useRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { selectedVideoState, VideoContent } from '../recoil/atoms';
 
 interface Content {
@@ -52,7 +52,7 @@ const CourseContentItem = ({ content }: { content: Content }) => (
 
 const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
 
-  const [selectedVideo, setSelectedVideo] = useRecoilState(selectedVideoState);
+  const setSelectedVideo = useSetRecoilState(selectedVideoState);
 
   const handleSelectContent = (content: VideoContent) => {
     if (content.type === 'video') {

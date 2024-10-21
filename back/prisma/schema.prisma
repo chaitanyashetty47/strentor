@@ -1,13 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,41 +7,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  USER
-  TUTOR
-}
-
 model Users {
-  id          Int      @id @default(autoincrement())
-  name        String
-  email       String   @unique
-  supabaseId  String   @unique
-  role        Role     @default(USER)
-  createdCourses Course[] @relation("CreatedCourses")
+  id               Int              @id @default(autoincrement())
+  name             String
+  email            String           @unique
+  supabaseId       String           @unique
+  avatarUrl        String?
+  bio              String?
+  aboutMe          String?
+  role             Role             @default(USER)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  certificate      Certificate[]
+  createdCourses   Course[]         @relation("CreatedCourses")
+  Review           Review[]
   purchasedCourses UsersPurchases[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  certificate Certificate[]
 }
 
 model Course {
-  id              Int             @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   title           String
   imageUrl        String
   description     String
-  openToEveryone  Boolean         @default(false)
-  slug            String          @unique
-  discordOauthUrl String          @default("")
-  content         CourseContent[]
-  purchasedBy     UsersPurchases[]
-  certificate     Certificate[]
-  certIssued      Boolean         @default(false)
-  createdBy       Users            @relation("CreatedCourses", fields: [createdById], references: [id])
+  openToEveryone  Boolean          @default(false)
+  slug            String           @unique
+  discordOauthUrl String           @default("")
+  certIssued      Boolean          @default(false)
   createdById     Int
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  certificate     Certificate[]
+  createdBy       Users            @relation("CreatedCourses", fields: [createdById], references: [id])
+  content         CourseContent[]
+  Review          Review[]
+  purchasedBy     UsersPurchases[]
 }
 
 model Content {
@@ -62,40 +51,56 @@ model Content {
   description      String?
   thumbnail        String?
   parentId         Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  notionMetadataId Int?
   parent           Content?        @relation("ContentToContent", fields: [parentId], references: [id])
   children         Content[]       @relation("ContentToContent")
   courses          CourseContent[]
-  notionMetadataId Int?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
 }
 
 model CourseContent {
-  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId  Int
-  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
   contentId Int
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@id([courseId, contentId])
 }
 
-
 model UsersPurchases {
-  Users      Users    @relation(fields: [UsersId], references: [id])
-  UsersId    Int
-  course    Course  @relation(fields: [courseId], references: [id])
-  courseId  Int
+  UsersId     Int
+  courseId    Int
   purchasedAt DateTime @default(now())
+  Users       Users    @relation(fields: [UsersId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
 
   @@id([UsersId, courseId])
 }
 
 model Certificate {
-  id        Int      @id @default(autoincrement())
-  course    Course   @relation(fields: [courseId], references: [id])
-  courseId  Int
-  Users      Users     @relation(fields: [UsersId], references: [id])
-  UsersId    Int
-  issuedAt  DateTime @default(now())
+  id       Int      @id @default(autoincrement())
+  courseId Int
+  issuedAt DateTime @default(now())
+  UsersId  Int
+  Users    Users    @relation(fields: [UsersId], references: [id])
+  course   Course   @relation(fields: [courseId], references: [id])
 }
 
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  userId    Int
+  courseId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Course    Course   @relation(fields: [courseId], references: [id])
+  Users     Users    @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  USER
+  TUTOR
+}

@@ -1,18 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient, Role } from '@prisma/client';
 
-// declare global {
-//   namespace Express {
-//       interface Request {
-//           user?: {
-//               id: string;
-//               role:Role // Adjust the type as necessary
-//               // Add other user properties if needed
-//           };
-//       }
-//   }
-// }
-
 declare global {
   namespace Express {
     interface Request {
@@ -30,7 +18,7 @@ declare global {
 
 const prisma = new PrismaClient();
 
-// Create a new course (Tutor or Admin only)
+//Create a new course (Tutor or Admin only)
 export const createCourse = async (req: Request, res: Response):Promise<void> => {
   try {
     const { title, imageUrl, description, openToEveryone, slug, discordOauthUrl } = req.body;
@@ -67,6 +55,7 @@ export const createCourse = async (req: Request, res: Response):Promise<void> =>
     res.status(500).json({ error: 'Failed to create course' });
   }
 };
+
 
 // Update a course (Tutor or Admin only)
 export const updateCourse = async (req: Request, res: Response) => {
