@@ -1,4 +1,10 @@
-# .env
+ .env
 node_modules/
-# backend/.env
+back/.env
 frontend/.env
+
+dist
+frontend/dist
+back/dist
+
+
