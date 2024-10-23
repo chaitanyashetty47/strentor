@@ -7,7 +7,6 @@ import Home from './pages/Home';
 import { UserProvider } from '@/hooks/useUser';
 import { ToastProvider } from "@/components/ui/toast";
 import Course from './pages/Course';
-import CourseContentDropdown from './pages/Content';
 import AdminCourseCard from './pages/AdminHome'
 import CoursePage from './pages/CourseDetail'
 import AdminCourseDetail from './pages/AdminCourseDetail';

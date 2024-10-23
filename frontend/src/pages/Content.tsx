@@ -3,7 +3,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Video, FileText, Folder } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import axios from 'axios';
-
+import { BACKEND_URL } from '@/lib/config';
 import { useSetRecoilState } from 'recoil';
 import { selectedVideoState, VideoContent } from '../recoil/atoms';
 
@@ -72,7 +72,7 @@ const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
   useEffect(() => {
     const fetchCourseContents = async () => {
       try {
-        const { data } = await axios.get<Course>(`http://localhost:3000/course/${courseId}/content`, {
+        const { data } = await axios.get<Course>(`${BACKEND_URL}/course/${courseId}/content`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },

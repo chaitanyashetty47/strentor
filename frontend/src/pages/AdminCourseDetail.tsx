@@ -35,6 +35,8 @@ export default function AdminCourseDetail() {
     setIsUpdateModalOpen(true)
   };
 
+
+
   const fetchFolders = async () => {
     try {
       // Send request to backend with the token in the Authorization header
@@ -53,7 +55,7 @@ export default function AdminCourseDetail() {
     // Fetch Folders from backend
     useEffect(() => {
       fetchFolders();
-    }, [folderToUpdate]);
+    }, [folderToUpdate,setFolderToUpdate]);
 
   const handleOpenModal = () => {
     setIsAddModalOpen(true);

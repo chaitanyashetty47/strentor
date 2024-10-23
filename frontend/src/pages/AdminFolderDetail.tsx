@@ -34,6 +34,7 @@ export default function AdminFolderDetail() {
 
   const handleUploadComplete = () => {
     setIsDialogOpen(false);
+    console.log(isDialogOpen);
     setRefreshTrigger(prev => prev + 1);
   };
 

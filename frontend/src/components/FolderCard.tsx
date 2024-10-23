@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import axios from 'axios';
 import { Link} from 'react-router-dom';
 import { useUser } from "@/hooks/useUser";
+import { BACKEND_URL } from '@/lib/config';
 
 interface FolderCardProps {
   folder: Folders;
@@ -23,8 +24,8 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
 
   const handleDelete = async () => {
     try {
-      //console.log(`http://localhost:3000/content/${folder.id}`)
-      await axios.delete(`http://localhost:3000/content/delete-subfolder/${folder.id}`, {
+     
+      await axios.delete(`${BACKEND_URL}/content/delete-subfolder/${folder.id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
