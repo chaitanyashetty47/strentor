@@ -97,38 +97,38 @@ export const createSubfolder = async (req: Request, res: Response): Promise<void
 //   }
 // };
 
-export const uploadContent = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const file = req.file;
+// export const uploadContent = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const file = req.file;
 
-    // Check if the file was uploaded
-    if (!file) {
-      console.error('No file uploaded.');
-      res.status(400).send("No file uploaded.");
-      return;
-    }
+//     // Check if the file was uploaded
+//     if (!file) {
+//       console.error('No file uploaded.');
+//       res.status(400).send("No file uploaded.");
+//       return;
+//     }
 
-    console.log('Uploading file to Cloudinary...');
-    const result = await cloudinary.uploader.upload(
-      `data:${file.mimetype};base64,${file.buffer.toString('base64')}`, 
-      {
-        resource_type: "auto",
-        folder: `test-folder`,
-      }
-    );
+//     console.log('Uploading file to Cloudinary...');
+//     const result = await cloudinary.uploader.upload(
+//       `data:${file.mimetype};base64,${file.buffer.toString('base64')}`, 
+//       {
+//         resource_type: "auto",
+//         folder: `test-folder`,
+//       }
+//     );
 
-    console.log('File uploaded to Cloudinary successfully:', result);
+//     console.log('File uploaded to Cloudinary successfully:', result);
 
-    res.status(201).json({ message: 'File uploaded to Cloudinary successfully!', cloudinaryResult: result });
-  } catch (error:any) {
-    console.error('Error during Cloudinary upload:', {
-      error: error.message,
-      stack: error.stack,
-      environment: process.env.NODE_ENV,
-    });
-    res.status(500).json({ error: 'An error occurred during Cloudinary upload.', details: error.message });
-  }
-};
+//     res.status(201).json({ message: 'File uploaded to Cloudinary successfully!', cloudinaryResult: result });
+//   } catch (error:any) {
+//     console.error('Error during Cloudinary upload:', {
+//       error: error.message,
+//       stack: error.stack,
+//       environment: process.env.NODE_ENV,
+//     });
+//     res.status(500).json({ error: 'An error occurred during Cloudinary upload.', details: error.message });
+//   }
+// };
 
 
 
@@ -136,6 +136,97 @@ export const uploadContent = async (req: Request, res: Response): Promise<void> 
 
 
 // Get content by ID
+
+
+export const uploadContent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { courseId, subfolderId } = req.params;
+    const { title, description, type } = req.body;
+    const file = req.file;
+
+    // Check if file exists
+    if (!file) {
+      console.error('No file uploaded.');
+      res.status(400).send('No file uploaded.');
+      return;
+    }
+
+    // Convert file buffer to base64
+    const fileBuffer = file.buffer;
+    const base64Data = fileBuffer.toString('base64');
+    const fileUri = `data:${file.mimetype};base64,${base64Data}`;
+
+    // Create a promise-based upload function
+    const uploadToCloudinary = (): Promise<any> => {
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload(fileUri, {
+          resource_type: 'auto',
+          folder: `courses/${courseId}/${subfolderId}`,
+          invalidate: true
+        })
+          .then((result) => {
+            console.log('Upload successful:', result);
+            resolve(result);
+          })
+          .catch((error) => {
+            console.error('Upload failed:', error);
+            reject(error);
+          });
+      });
+    };
+
+    // Execute upload and database operations
+    const cloudinaryResult = await uploadToCloudinary();
+    
+    // Save content in the database
+    const newContent = await prisma.content.create({
+      data: {
+        type: type || 'video',
+        title,
+        description,
+        thumbnail: cloudinaryResult.secure_url,
+        parentId: parseInt(subfolderId),
+      },
+    });
+
+    // Link content to the course
+    await prisma.course.update({
+      where: { id: parseInt(courseId) },
+      data: {
+        content: {
+          create: [{ content: { connect: { id: newContent.id } } }]
+        },
+      },
+    });
+
+    // Send success response
+    res.status(201).json({
+      success: true,
+      message: 'File uploaded and added to course successfully!',
+      content: newContent,
+      cloudinaryUrl: cloudinaryResult.secure_url
+    });
+
+  } catch (error: any) {
+    // Enhanced error logging
+    console.error('Error during upload process:', {
+      error: error.message,
+      stack: error.stack,
+      environment: process.env.NODE_ENV,
+    });
+
+    // Send error response
+    res.status(500).json({
+      success: false,
+      error: 'An error occurred during the upload process.',
+      details: error.message
+    });
+  } finally {
+    // Ensure Prisma connection is closed
+    await prisma.$disconnect();
+  }
+};
+
 export const getContent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { contentId } = req.params;
