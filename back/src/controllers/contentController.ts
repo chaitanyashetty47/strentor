@@ -99,52 +99,34 @@ export const createSubfolder = async (req: Request, res: Response): Promise<void
 
 export const uploadContent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { courseId, subfolderId } = req.params;
-    const { title, description, type } = req.body;
     const file = req.file;
 
     // Check if the file was uploaded
     if (!file) {
+      console.error('No file uploaded.');
       res.status(400).send("No file uploaded.");
       return;
     }
 
-    // Upload file to Cloudinary using buffer from memory
-    const result = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`, {
-      resource_type: "auto",
-      folder: `courses/${courseId}/${subfolderId}`,
-    });
+    console.log('Uploading file to Cloudinary...');
+    const result = await cloudinary.uploader.upload(
+      `data:${file.mimetype};base64,${file.buffer.toString('base64')}`, 
+      {
+        resource_type: "auto",
+        folder: `test-folder`,
+      }
+    );
 
-    const imageUrl = result.secure_url;
+    console.log('File uploaded to Cloudinary successfully:', result);
 
-    // Save content in the database
-    const newContent = await prisma.content.create({
-      data: {
-        type: type || 'video',
-        title,
-        description,
-        thumbnail: imageUrl, // Store the Cloudinary URL
-        parentId: parseInt(subfolderId),
-      },
-    });
-
-    // Link content to the course
-    await prisma.course.update({
-      where: { id: parseInt(courseId) },
-      data: {
-        content: {
-          create: [{ content: { connect: { id: newContent.id } } }]
-        },
-      },
-    });
-
-    res.status(201).json({
-      message: 'File uploaded and added to course successfully!',
-      content: newContent,
-    });
+    res.status(201).json({ message: 'File uploaded to Cloudinary successfully!', cloudinaryResult: result });
   } catch (error:any) {
-    console.error('Error uploading content:', error);
-    res.status(500).json({ error: 'An error occurred during upload.', details: error.message });
+    console.error('Error during Cloudinary upload:', {
+      error: error.message,
+      stack: error.stack,
+      environment: process.env.NODE_ENV,
+    });
+    res.status(500).json({ error: 'An error occurred during Cloudinary upload.', details: error.message });
   }
 };
 
