@@ -8,7 +8,19 @@ import { setUserMiddleware } from './middleware/auth';
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://strentor-frontend.vercel.app/', 'http://localhost:3000', 'http://localhost:5173'],
+  credentials: true
+}))
+
+// Also ensure you're setting proper headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
+  next();
+});
+
 app.use(express.json());
 
 // Apply authentication middleware to all routes
