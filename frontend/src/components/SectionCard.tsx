@@ -20,7 +20,7 @@ interface FolderCardProps {
 export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const {accessToken} = useUser();
+  const { accessToken } = useUser();
 
   const handleDelete = async () => {
     try {
@@ -39,8 +39,7 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
   };
 
   return (
-    <Card className="w-full max-w-sm bg-blue-600 text-white overflow-hidden">
-      {/* <Link to = {`/course/${course.title}/${course.id}`} > */}
+    <Card className="w-full max-w-sm bg-purple-800 text-white overflow-hidden">
       <CardContent className="p-6 relative">
         <div className="absolute top-0 right-0 left-0 h-16 bg-gradient-to-br from-white/20 to-transparent rounded-tr-lg" />
         <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-white/20 to-transparent rounded-bl-full" />
@@ -51,73 +50,70 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
           <p className="text-sm">{folder.description}</p>
         </div>
       </CardContent>
-      {/* </Link> */}
-      <div className="bg-blue-700 p-4 flex justify-between items-center">
+
+      <div className="bg-purple-900 p-4 flex justify-between items-center">
         <Folder />
         
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              { 
-                <DropdownMenuItem onClick={() => setIsUpdateModalOpen(true)}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  <span>Update</span>
-                </DropdownMenuItem>
-              }
-              {
-                <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
-                  <Trash className="mr-2 h-4 w-4" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
-                
-              }
-            </DropdownMenuContent>
-          </DropdownMenu>
-        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            { 
+              <DropdownMenuItem onClick={() => setIsUpdateModalOpen(true)}>
+                <Edit className="mr-2 h-4 w-4" />
+                <span>Update</span>
+              </DropdownMenuItem>
+            }
+            {
+              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
+                <Trash className="mr-2 h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            }
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you sure you want to delete this folder?</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete the folder and all its contents.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
-            <DialogContent className="sm:max-w-[425px] bg-white">
-              <DialogTitle>Update Content</DialogTitle>
-              <UpdateContentForm
-                contentId={folder.id}
-                initialData={{
-                  title: folder.title,
-                  description: folder.description,
-                  type: folder.type
-                }}
-                onUpdateComplete={() => {
-                  setIsUpdateModalOpen(false);
-                  if (onUpdate) onUpdate();
-                }}
-                onCancel={() => setIsUpdateModalOpen(false)}
-              />
-           </DialogContent>
-        </Dialog>
-      
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure you want to delete this folder?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the folder and all its contents.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-white">
+          <DialogTitle>Update Content</DialogTitle>
+          <UpdateContentForm
+            contentId={folder.id}
+            initialData={{
+              title: folder.title,
+              description: folder.description,
+              type: folder.type
+            }}
+            onUpdateComplete={() => {
+              setIsUpdateModalOpen(false);
+              if (onUpdate) onUpdate(); // Call onUpdate when the update is complete
+            }}
+            onCancel={() => setIsUpdateModalOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

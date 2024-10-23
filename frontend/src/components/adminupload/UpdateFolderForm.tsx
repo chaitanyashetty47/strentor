@@ -100,7 +100,7 @@ const UpdateFolderForm = ({ folder, onClose, onFolderUpdated }: UpdateFolderForm
         <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className='bg-purple-600 hover:bg-purple-700'>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

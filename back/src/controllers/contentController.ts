@@ -37,56 +37,6 @@ export const createSubfolder = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const uploadContent = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { courseId, subfolderId } = req.params;
-    const { title, description, type } = req.body;
-    const file = req.file;
-
-    // Check if the file was uploaded
-    if (!file) {
-      res.status(400).send("No file uploaded.");
-      return;
-    }
-
-    // Upload file to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
-      resource_type: "auto",
-      folder: `courses/${courseId}/${subfolderId}`,
-    });
-
-    // Save content in the database
-    const newContent = await prisma.content.create({
-      data: {
-        type: type || 'video',
-        title,
-        description,
-        thumbnail: result.secure_url, // Store the Cloudinary URL
-        parentId: parseInt(subfolderId),
-      },
-    });
-
-    // Link content to the course
-    await prisma.course.update({
-      where: { id: parseInt(courseId) },
-      data: {
-        content: {
-          create: [{ content: { connect: { id: newContent.id } } }]
-        },
-      },
-    });
-
-    res.status(201).json({
-      message: 'File uploaded and added to course successfully!',
-      content: newContent,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred during upload.' });
-  }
-};
-
-
 // export const uploadContent = async (req: Request, res: Response): Promise<void> => {
 //   try {
 //     const { courseId, subfolderId } = req.params;
@@ -99,53 +49,105 @@ export const uploadContent = async (req: Request, res: Response): Promise<void> 
 //       return;
 //     }
 
-//     // Upload file to Cloudinary (adjust the path for your project)
-//     const result = await cloudinary.uploader.upload_stream(
-//       {
-//         resource_type: "auto",
-//         folder: `courses/${courseId}/${subfolderId}`,
+//     // Upload file to Cloudinary
+//     const result = await cloudinary.uploader.upload(file.path, {
+//       resource_type: "auto",
+//       folder: `courses/${courseId}/${subfolderId}`,
+//     });
+
+//     // Save content in the database
+//     const newContent = await prisma.content.create({
+//       data: {
+//         type: type || 'video',
+//         title,
+//         description,
+//         thumbnail: result.secure_url, // Store the Cloudinary URL
+//         parentId: parseInt(subfolderId),
 //       },
-//       (error, result) => {
-//         if (error) {
-//           res.status(500).json({ error: 'Error uploading to Cloudinary' });
-//           return;
-//         }
+//     });
 
-//         // Save content in the database
-//         const newContent = await prisma.content.create({
-//           data: {
-//             type: type || 'video',
-//             title,
-//             description,
-//             thumbnail: result?.secure_url || '', // Store the Cloudinary URL
-//             parentId: parseInt(subfolderId),
-//           },
-//         });
+//     // Link content to the course
+//     await prisma.course.update({
+//       where: { id: parseInt(courseId) },
+//       data: {
+//         content: {
+//           create: [{ content: { connect: { id: newContent.id } } }]
+//         },
+//       },
+//     });
 
-//         // Link content to the course
-//         await prisma.course.update({
-//           where: { id: parseInt(courseId) },
-//           data: {
-//             content: {
-//               create: [{ content: { connect: { id: newContent.id } } }]
-//             },
-//           },
-//         });
-
-//         res.status(201).json({
-//           message: 'File uploaded and added to course successfully!',
-//           content: newContent,
-//         });
-//       }
-//     );
-
-//     // Pipe the file stream to Cloudinary
-//     file.stream.pipe(result);
+//     res.status(201).json({
+//       message: 'File uploaded and added to course successfully!',
+//       content: newContent,
+//     });
 //   } catch (error) {
 //     console.error(error);
 //     res.status(500).json({ error: 'An error occurred during upload.' });
 //   }
 // };
+
+export const uploadContent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { courseId, subfolderId } = req.params;
+    const { title, description, type } = req.body;
+    const file = req.file;
+
+    // Check if the file was uploaded
+    if (!file) {
+      res.status(400).send("No file uploaded.");
+      return;
+    }
+
+    // Upload file to Cloudinary using buffer from memory
+    const result = await cloudinary.uploader.upload_stream(
+      { resource_type: "auto", folder: `courses/${courseId}/${subfolderId}` },
+      async (error, result) => {
+        if (error) {
+          console.error('Cloudinary Upload Error:', error);
+          res.status(500).send('Failed to upload file to Cloudinary');
+          return;
+        }
+
+        const imageUrl = result?.secure_url!;
+
+        // Save content in the database
+        const newContent = await prisma.content.create({
+          data: {
+            type: type || 'video',
+            title,
+            description,
+            thumbnail: imageUrl, // Store the Cloudinary URL
+            parentId: parseInt(subfolderId),
+          },
+        });
+
+        // Link content to the course
+        await prisma.course.update({
+          where: { id: parseInt(courseId) },
+          data: {
+            content: {
+              create: [{ content: { connect: { id: newContent.id } } }]
+            },
+          },
+        });
+
+        res.status(201).json({
+          message: 'File uploaded and added to course successfully!',
+          content: newContent,
+        });
+      }
+    );
+
+    // Pipe the file buffer to Cloudinary upload stream
+    result.end(file.buffer);
+  } catch (error) {
+    console.error('Error uploading content:', error);
+    res.status(500).json({ error: 'An error occurred during upload.' });
+  }
+};
+
+
+
 
 
 // Get content by ID

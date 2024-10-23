@@ -6,18 +6,33 @@ import { BACKEND_URL } from "@/lib/config";
 import { Courses } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useUser } from "@/hooks/useUser";
+import axios from "axios";
 
 export default function Home() {
   const [courses, setCourses] = useState<Courses[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { accessToken } = useUser();
+
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/course/getall`);
-      const data = await response.json();
+      setLoading(true);
+      const { data } = await axios.get<any>(`${BACKEND_URL}/users/created`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       setCourses(data);
     } catch (error) {
-      console.error("Error fetching courses:", error);
+      setError('An unexpected error occurred');
+      setCourses([]);
+      console.error("Error fetching Courses:", error)
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -36,6 +51,31 @@ export default function Home() {
   const handleCourseAdded = () => {
     fetchCourses(); // Refresh the course list
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <Header/>
+        <div className="text-red-500 mb-4">{error}</div>
+        <Button 
+          variant="outline" 
+          onClick={() => window.location.reload()}
+        >
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div>

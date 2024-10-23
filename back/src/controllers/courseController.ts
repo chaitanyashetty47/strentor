@@ -20,7 +20,58 @@ declare global {
 const prisma = new PrismaClient();
 
 //Create a new course (Tutor or Admin only)
-export const createCourse = async (req: Request, res: Response):Promise<void> => {
+// export const createCourse = async (req: Request, res: Response):Promise<void> => {
+//   try {
+//     const { title, description, level, duration } = req.body;
+//     const file = req.file;
+//     const createdById = req.user?.id;
+
+//     if (!createdById) {
+//       res.status(401).json({ error: 'User not authenticated' });
+//       return ;
+//     }
+
+//    // const createdByIdNumber = parseInt(createdById as string, 10);
+   
+//    const createdByIdNumber = createdById
+//     if (isNaN(createdByIdNumber)) {
+//       res.status(400).json({ error: 'Invalid user ID' });
+//       return;
+//     }
+
+//     if (!file) {
+//       res.status(400).send("No photo uploaded.");
+//       return;
+//     }
+
+//     // Upload file to Cloudinary
+//     const result = await cloudinary.uploader.upload(file.path, {
+//       resource_type: "auto",
+//       folder: `course`,
+//     });
+
+//     const imageUrl = result.secure_url
+
+//     const course = await prisma.course.create({
+//       data: {
+//         title,
+//         imageUrl,
+//         description,
+//         duration,
+//         level,
+//         openToEveryone: true,
+//         createdBy: { connect: { id: createdByIdNumber } }
+//       }
+//     });
+
+//     res.status(201).json(course);
+//   } catch (error) {
+//     console.error('Error creating course:', error);
+//     res.status(500).json({ error: 'Failed to create course' });
+//   }
+// };
+
+export const createCourse = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, level, duration } = req.body;
     const file = req.file;
@@ -28,43 +79,55 @@ export const createCourse = async (req: Request, res: Response):Promise<void> =>
 
     if (!createdById) {
       res.status(401).json({ error: 'User not authenticated' });
-      return ;
+      return;
     }
 
-   // const createdByIdNumber = parseInt(createdById as string, 10);
-   
-   const createdByIdNumber = createdById
+    const createdByIdNumber = createdById;
     if (isNaN(createdByIdNumber)) {
       res.status(400).json({ error: 'Invalid user ID' });
       return;
     }
 
     if (!file) {
-      res.status(400).send("No photo uploaded.");
+      res.status(400).send('No file uploaded.');
       return;
     }
 
-    // Upload file to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
-      resource_type: "auto",
-      folder: `course`,
-    });
+    // Upload file to Cloudinary from memory buffer
+    const result = await cloudinary.uploader.upload_stream(
+      { resource_type: 'auto', folder: 'course' },
+      (error, result) => {
+        if (error) {
+          console.error('Error uploading to Cloudinary:', error);
+          res.status(500).json({ error: 'Failed to upload image' });
+          return;
+        }
 
-    const imageUrl = result.secure_url
+        const imageUrl = result?.secure_url!;
 
-    const course = await prisma.course.create({
-      data: {
-        title,
-        imageUrl,
-        description,
-        duration,
-        level,
-        openToEveryone: true,
-        createdBy: { connect: { id: createdByIdNumber } }
+        // Create the course with the image URL
+        prisma.course.create({
+          data: {
+            title,
+            imageUrl,
+            description,
+            duration,
+            level,
+            openToEveryone: true,
+            createdBy: { connect: { id: createdByIdNumber } },
+          },
+        })
+          .then((course) => res.status(201).json(course))
+          .catch((error) => {
+            console.error('Error creating course:', error);
+            res.status(500).json({ error: 'Failed to create course' });
+          });
       }
-    });
+    );
 
-    res.status(201).json(course);
+    // Use a readable stream to pipe the buffer to Cloudinary
+    const stream = result;
+    stream.end(file.buffer);
   } catch (error) {
     console.error('Error creating course:', error);
     res.status(500).json({ error: 'Failed to create course' });

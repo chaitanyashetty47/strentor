@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { BACKEND_URL } from "@/lib/config";
 import { useUser } from "@/hooks/useUser";
 
@@ -24,7 +23,7 @@ interface FormValues {
 }
 
 export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: UploadFormProps) {
-  const [uploadProgress, setUploadProgress] = useState(0);
+
   const [isLoading, setIsLoading] = useState(false);
   const { accessToken } = useUser();
 
@@ -66,9 +65,11 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
         throw new Error('Upload failed');
       }
 
-      form.reset();
-      setUploadProgress(0);
+      
       onUploadComplete();
+    
+      form.reset();
+      
     } catch (error) {
       console.error('Error uploading file:', error);
       // Set form error
@@ -209,9 +210,7 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
           </Button>
         </div>
 
-        {uploadProgress > 0 && (
-          <Progress value={uploadProgress} className="w-full" />
-        )}
+        
       </form>
     </Form>
   );

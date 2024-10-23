@@ -5,7 +5,8 @@ import {authMiddleware, isTutorOrAdmin} from '../middleware/checkRole';
 
 const router = express.Router();
 
-const upload = multer({ dest: 'uploads/' })
+// const upload = multer({ dest: 'uploads/' })
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/create', authMiddleware ,isTutorOrAdmin, upload.single('file') ,createCourse);
 router.put('/update/:id', authMiddleware ,isTutorOrAdmin, updateCourse);

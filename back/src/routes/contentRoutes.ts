@@ -15,7 +15,8 @@ import {
 } from '../controllers/contentController';
 import {isTutorOrAdmin, authMiddleware} from '../middleware/checkRole'; // Middleware to check role
 
-const upload = multer({ dest: 'uploads/' })
+// const upload = multer({ dest: 'uploads/' })
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 

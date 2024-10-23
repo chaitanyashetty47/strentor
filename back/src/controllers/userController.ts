@@ -5,84 +5,110 @@ import cloudinary from '../config/cloudinary';
 
 const prisma = new PrismaClient();
 
-// export const createOrUpdateUser = async (req: Request, res: Response) => {
-//   try {
-//     const { supabaseId, email, name, role } = req.body;
-
-//     if (!supabaseId || !email || !name) {
-//       return res.status(400).json({ error: 'Missing required fields' });
-//     }
-
-//     const user = await prisma.users.upsert({
-//       where: { supabaseId: supabaseId },
-//       update: {
-//         email,
-//         name,
-//         role: role as Role,
-//       },
-//       create: {
-//         supabaseId,
-//         email,
-//         name,
-//         role: (role as Role) || Role.USER,
-//       },
-//     });
-
-//     res.status(200).json(user);
-//   } catch (error) {
-//     console.error('Error creating/updating user:', error);
-//     res.status(500).json({ error: 'Failed to create/update user' });
-//   }
-// };
-
-
-export const createOrUpdateUser =  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { supabaseId, email, role, name, bio, aboutMe } = req.body;
+// export const createOrUpdateUser =  async (req: Request, res: Response): Promise<void> => {
+//     try {
+//       const { supabaseId, email, role, name, bio, aboutMe } = req.body;
  
 
-      const file = req.file;
+//       const file = req.file;
 
-      // Handle file upload if a file is provided
-      if (!file) {
-        res.status(400).send("No file uploaded.");
-        return;
-      }
+//       // Handle file upload if a file is provided
+//       if (!file) {
+//         res.status(400).send("No file uploaded.");
+//         return;
+//       }
   
-      // Upload file to Cloudinary
-      const result = await cloudinary.uploader.upload(file.path, {
-        resource_type: "auto",
-        folder: `users`,
-      });
+//       // Upload file to Cloudinary
+//       const result = await cloudinary.uploader.upload(file.path, {
+//         resource_type: "auto",
+//         folder: `users`,
+//       });
   
       
 
-      const user = await prisma.users.upsert({
-        where: { supabaseId: supabaseId },
-        update: {
-          email,
-          name,
-          avatarUrl: result.secure_url, // Only update if a new image is uploaded
-          role,
-          ...(role === 'TUTOR' && { bio, aboutMe }), // Conditionally add bio and aboutMe if the role is TUTOR
-        },
-        create: {
-          supabaseId,
-          email,
-          name,
-          avatarUrl: result.secure_url,
-          role,
-          bio: role === 'TUTOR' ? bio : undefined,
-          aboutMe: role === 'TUTOR' ? aboutMe : undefined,
-        },
-      });
+//       const user = await prisma.users.upsert({
+//         where: { supabaseId: supabaseId },
+//         update: {
+//           email,
+//           name,
+//           avatarUrl: result.secure_url, // Only update if a new image is uploaded
+//           role,
+//           ...(role === 'TUTOR' && { bio, aboutMe }), // Conditionally add bio and aboutMe if the role is TUTOR
+//         },
+//         create: {
+//           supabaseId,
+//           email,
+//           name,
+//           avatarUrl: result.secure_url,
+//           role,
+//           bio: role === 'TUTOR' ? bio : undefined,
+//           aboutMe: role === 'TUTOR' ? aboutMe : undefined,
+//         },
+//       });
 
-      res.status(200).json(user);
-    } catch (error) {
-      console.error('Error creating/updating user:', error);
-      res.status(500).json({ error: 'Failed to create/update user' });
+//       res.status(200).json(user);
+//     } catch (error) {
+//       console.error('Error creating/updating user:', error);
+//       res.status(500).json({ error: 'Failed to create/update user' });
+//     }
+//   };
+
+export const createOrUpdateUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { supabaseId, email, role, name, bio, aboutMe } = req.body;
+    const file = req.file;
+
+    // Handle file upload if a file is provided
+    if (!file) {
+      res.status(400).send("No file uploaded.");
+      return;
     }
-  };
+
+    // Upload file to Cloudinary using buffer from memory
+    const result = await cloudinary.uploader.upload_stream(
+      { resource_type: "auto", folder: `users` },
+      async (error, result) => {
+        if (error) {
+          console.error('Cloudinary Upload Error:', error);
+          res.status(500).send('Failed to upload file to Cloudinary');
+          return;
+        }
+
+        const imageUrl = result?.secure_url!;
+
+        // Upsert user in the database
+        const user = await prisma.users.upsert({
+          where: { supabaseId },
+          update: {
+            email,
+            name,
+            avatarUrl: imageUrl, // Only update if a new image is uploaded
+            role,
+            ...(role === 'TUTOR' && { bio, aboutMe }), // Conditionally add bio and aboutMe if the role is TUTOR
+          },
+          create: {
+            supabaseId,
+            email,
+            name,
+            avatarUrl: imageUrl,
+            role,
+            bio: role === 'TUTOR' ? bio : undefined,
+            aboutMe: role === 'TUTOR' ? aboutMe : undefined,
+          },
+        });
+
+        res.status(200).json(user);
+      }
+    );
+
+    // Pipe the file buffer to Cloudinary upload stream
+    result.end(file.buffer);
+  } catch (error) {
+    console.error('Error creating/updating user:', error);
+    res.status(500).json({ error: 'Failed to create/update user' });
+  }
+};
+
 
 
 
@@ -178,3 +204,38 @@ export const getUserById = async (req: Request, res:Response):Promise<void> =>{
 
 }
 
+
+export const getCoursesCreatedByUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: 'User not authenticated' });
+      return;
+    }
+
+    const createdCourses = await prisma.course.findMany({
+      where: { createdById: userId },
+      select: {
+        id: true,
+        title: true,
+        imageUrl: true,
+        description: true,
+        duration: true,
+        level: true,
+        openToEveryone: true,
+        slug: true,
+        createdById: true,
+        createdAt: true,
+        updatedAt: true,
+        certificate: true,
+        content: true,
+      },
+    });
+
+    res.json(createdCourses);
+  } catch (error) {
+    console.error('Error fetching courses created by user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
