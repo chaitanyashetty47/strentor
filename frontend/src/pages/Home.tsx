@@ -18,6 +18,7 @@ export default function Home (){
         setCourses(data);
       } catch (error) {
         console.error("Error fetching courses:", error);
+        console.log("error is: ",error)
       }
     };
 
