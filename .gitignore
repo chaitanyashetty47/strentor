@@ -3,8 +3,5 @@ node_modules/
 back/.env
 frontend/.env
 
-dist
-frontend/dist
-back/dist
 
 
