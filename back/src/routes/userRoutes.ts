@@ -4,7 +4,8 @@ import { createOrUpdateUser, getAllUsers, getUserCourse, getUserById, getCourses
 
 const router = express.Router();
 
-const upload = multer({ dest: 'uploads/' })
+// const upload = multer({ dest: 'uploads/' })
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/', upload.single('file'), createOrUpdateUser)
 router.get('/getAll', getAllUsers)
