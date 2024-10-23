@@ -1,5 +1,6 @@
 // atoms.ts
 import { atom } from 'recoil';
+import { Courses } from '@/types/types';
 
 export interface VideoContent {
   id: number;
@@ -12,4 +13,9 @@ export interface VideoContent {
 export const selectedVideoState = atom<VideoContent | null>({
   key: 'selectedVideoState', // unique ID for this atom
   default: null, // initial state
+});
+
+export const courseState = atom<Courses | null>({
+  key: 'courseState',
+  default: null,
 });

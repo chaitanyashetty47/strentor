@@ -10,6 +10,8 @@ import {
   createSubfolder,
   getContentOfCourse,
   getContentOfSection,
+  deleteSubfolder,
+  updateSubfolder
 } from '../controllers/contentController';
 import {isTutorOrAdmin, authMiddleware} from '../middleware/checkRole'; // Middleware to check role
 
@@ -37,5 +39,10 @@ router.get('/courses/:courseId/folders',authMiddleware,getContentOfCourse)
 
 //Route to get content of a week/section
 router.get('/courses/:courseId/folders/:folderId',authMiddleware,getContentOfSection)
+
+//Route To delete subfolder
+router.delete('/delete-subfolder/:folderId/:parentId?', authMiddleware, isTutorOrAdmin, deleteSubfolder);
+
+router.put('/update-subfolder/:folderId', authMiddleware, isTutorOrAdmin, updateSubfolder)
 
 export default router;

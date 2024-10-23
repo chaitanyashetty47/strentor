@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {useUser} from '@/hooks/useUser';
+import { BACKEND_URL } from '@/lib/config';
 
 interface Course {
   id: number;
@@ -39,7 +40,7 @@ export const usePurchases = () => {
         const token = accessToken;
 
         // Send request to backend with the token in the Authorization header
-        const { data } = await axios.get<any>('http://localhost:3000/users/purchased', {
+        const { data } = await axios.get<any>(`${BACKEND_URL}/users/purchased`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -54,7 +55,7 @@ export const usePurchases = () => {
     };
 
     if(user) fetchPurchases();
-  }, [user]); // Only runs on mount
+  }, [user]); 
 
   return { purchases, loading, error };
 };

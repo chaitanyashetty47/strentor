@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -52,5 +52,51 @@ export const joinCourse = async (req: Request, res: Response):Promise<void> =>  
   } catch (error) {
     console.error('Error joining course:', error);
     res.status(500).json({ error: 'Failed to join course' });
+  }
+};
+
+
+
+export const getPurchasedCourses = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: 'User not authenticated' });
+      return;
+    }
+
+    const purchasedCourses = await prisma.usersPurchases.findMany({
+      where: {
+        UsersId: userId
+      },
+      include: {
+        course: {
+          include: {
+            createdBy: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const formattedCourses = purchasedCourses.map(purchase => ({
+      id: purchase.course.id,
+      title: purchase.course.title,
+      imageUrl: purchase.course.imageUrl,
+      instructor: purchase.course.createdBy.name,
+      description: purchase.course.description,
+      duration: purchase.course.duration,
+      level: purchase.course.level,
+      purchasedAt: purchase.purchasedAt
+    }));
+
+    res.status(200).json(formattedCourses);
+  } catch (error) {
+    console.error('Error fetching purchased courses:', error);
+    res.status(500).json({ error: 'Failed to fetch purchased courses' });
   }
 };

@@ -30,13 +30,13 @@ export default function Header({ onSearch }: HeaderProps) {
   };
 
   // Check if the current path is Playground or Booking, and hide search bar accordingly
-  const hideSearchBar = location.pathname.includes('/playground') || location.pathname.includes('/book') || location.pathname.includes('/profile');
+  const hideSearchBar = location.pathname.includes('/course') || location.pathname.includes('/detail') || location.pathname.includes('/profile');
 
   return (
     <header className="flex items-center justify-between h-16 px-4 bg-background border-b md:px-6">
       <Link to="/home" className="flex items-center gap-2" >
         <MountainIcon className="w-6 h-6" />
-        <span className="sr-only">Acme Inc</span>
+        <span className="sr-only">Strentor</span>
       </Link>
 
       {/* Conditionally render the search bar */}
@@ -55,16 +55,16 @@ export default function Header({ onSearch }: HeaderProps) {
       <div className="flex items-center gap-4">
         <Link
           to="/profile"
-          className="text-muted-foreground hover:text-foreground hover:underline hover:text-green-500"
+          className="text-muted-foreground hover:text-foreground hover:underline hover:text-purple-500"
         >
-          Bookings
+          My Courses
         </Link>
       
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center">
+                <Avatar className="w-8 h-8 bg-primary text-primary-foreground bg-purple-500 flex items-center justify-center">
                   {user.email ? user.email[0].toUpperCase() : ''}
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
@@ -72,7 +72,7 @@ export default function Header({ onSearch }: HeaderProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem><Link to="/profile">My Account</Link></DropdownMenuItem>
-              {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
+            
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={handleSignOut}>Logout</DropdownMenuItem>
             </DropdownMenuContent>

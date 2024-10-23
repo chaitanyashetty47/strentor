@@ -3,9 +3,16 @@ export interface Courses{
   title:string,
   imageUrl:string,
   description:string,
-  openToEveryone:boolean,
-  slug:string,
-  
+  duration:string,
+  level:string,
+  createdById:number
+}
+
+export interface User{
+  name:string,
+  aboutMe:string,
+  avatarUrl:string,
+  bio:string
 }
 
 export interface Folders{

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Course" ALTER COLUMN "slug" DROP NOT NULL,
+ALTER COLUMN "discordOauthUrl" DROP NOT NULL;

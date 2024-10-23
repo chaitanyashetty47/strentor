@@ -5,13 +5,17 @@ import Auth from './pages/Login';
 import { Skeleton } from './components/Skeleton';
 import Home from './pages/Home';
 import { UserProvider } from '@/hooks/useUser';
+import { ToastProvider } from "@/components/ui/toast";
 import Course from './pages/Course';
 import CourseContentDropdown from './pages/Content';
-import AdminCourseCard from './pages/AdminCourse'
+import AdminCourseCard from './pages/AdminHome'
 import CoursePage from './pages/CourseDetail'
 import AdminCourseDetail from './pages/AdminCourseDetail';
 import AdminFolderDetail from './pages/AdminFolderDetail';
+import LearningDashboard from './pages/Profile';
 import { RecoilRoot } from 'recoil';
+
+
 
 
 
@@ -93,31 +97,33 @@ const AuthWrapper = () => {
 
 export default function App() {
   return (
-    <UserProvider>
-      <RecoilRoot>
-      <Router>
-        <Routes>
-          {/* Public route */}
-          <Route path="/" element={<AuthWrapper />} />
+    <ToastProvider>
+      <UserProvider>
+        <RecoilRoot>
+        <Router>
+          <Routes>
+            {/* Public route */}
+            <Route path="/" element={<AuthWrapper />} />
 
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
-            <Route path="/home" element={<Home />} />
-            <Route path="/course/:courseName/:courseId" element={<Course />} />
-            <Route path="/content" element={<CourseContentDropdown courseId={2} />} />
-            <Route path="/admin/home" element={<AdminCourseCard />} />
-            <Route path="/admin/course/:courseName/:courseId" element={<AdminCourseDetail />} />
-            <Route path="/admin/course/:courseId/folder/:folderId" element={<AdminFolderDetail />} />
-            <Route path="/detail" element={<CoursePage />} />
+            {/* Protected routes */}
+            <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/course/:courseName/:courseId" element={<Course />} />
+              <Route path="/profile" element={<LearningDashboard />} />
+              <Route path="/admin/home" element={<AdminCourseCard />} />
+              <Route path="/admin/course/:courseName/:courseId" element={<AdminCourseDetail />} />
+              <Route path="/admin/course/:courseId/folder/:folderId" element={<AdminFolderDetail />} />
+              <Route path="/course/:courseId/detail" element={<CoursePage />} />
 
-          </Route>
+            </Route>
 
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-      </RecoilRoot>
-    </UserProvider>
+            {/* Catch-all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+        </RecoilRoot>
+      </UserProvider>
+    </ToastProvider>
   );
 }

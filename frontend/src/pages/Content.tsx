@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Video, FileText, Folder } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import axios from 'axios';
@@ -40,15 +39,19 @@ const ContentIcon = ({ type }: { type: string }) => {
   }
 };
 
-const CourseContentItem = ({ content }: { content: Content }) => (
-  <div className="flex items-center space-x-2 py-2">
-    <Checkbox id={content.id.toString()} />
+const CourseContentItem = ({ content, onSelect }: { content: Content; onSelect: (content: Content) => void }) => (
+  <div
+    className="flex items-center space-x-2 py-2 cursor-pointer"
+    onClick={() => onSelect(content)} // Attach the click event here
+  >
+    {/* <Checkbox id={content.id.toString()} /> */}
     <label htmlFor={content.id.toString()} className="flex-grow text-sm">
       <ContentIcon type={content.type} />
       {content.title}
     </label>
   </div>
 );
+
 
 const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
 
@@ -114,7 +117,7 @@ const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
   return (
     <div className="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">Course content: {course.title}</h2>
+        <h2 className="text-lg font-semibold">Course Contents</h2>
       </div>
       <Accordion type="single" collapsible className="w-full">
         {rootItems.map((item) => (
@@ -127,14 +130,11 @@ const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
             <AccordionContent>
               <div className="px-4 space-y-2">
                 {childrenMap[item.id]?.map((child) => (
-                  // <CourseContentItem key={child.id} content={child} />
-                  <div
+                  <CourseContentItem
                     key={child.id}
-                    onClick={() => handleSelectContent(child)}
-                  >
-                    <CourseContentItem content={child} />
-                  </div>
-
+                    content={child}
+                    onSelect={handleSelectContent} // Pass the onSelect handler here
+                  />
                 ))}
               </div>
             </AccordionContent>
@@ -144,5 +144,6 @@ const CourseContentDropdown = ({ courseId }: { courseId: number }) => {
     </div>
   );
 };
+
 
 export default CourseContentDropdown;

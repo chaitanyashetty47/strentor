@@ -1,31 +1,35 @@
-import { useState } from 'react';
-import { Star } from 'lucide-react';
+import  { useState } from 'react';
 import { CardContent } from "@/components/ui/card";
+import { User } from '@/types/types';
+import { Skeleton } from './Skeleton';
 
-export default function Instructor() {
+interface InstructorProps {
+  tutor?: User; // Make tutor optional
+  tutorLoading: boolean;
+}
+
+export default function Instructor({ tutor, tutorLoading }: InstructorProps) {
   const [showFullBio, setShowFullBio] = useState(false);
 
-  const fullBio = `My name is Hitesh Choudhary, a retired corporate professional who has seamlessly transitioned into a full-time YouTuber. With a rich history as the founder of LCO (acquired) and a former CTO at iNeuron and Senior Director at PW, I bring a wealth of experience in building software and companies. My journey in the tech world has endowed me with unique insights and expertise, which I am passionate about sharing.
+  if (tutorLoading) {
+    return <Skeleton></Skeleton>;
+  }
 
-  On YouTube, I manage two thriving channels—one boasting 1 million subscribers and the other with 300,000—demonstrating my ability to connect with and educate a vast audience. My travels to 39 countries have enriched my understanding and provided a global perspective that I incorporate into my content.
+  if (!tutor) {
+    return <div>No Instructor Details Available</div>;
+  }
 
-  My hallmark is making the toughest topics easy to understand, a skill that has earned me a dedicated following. I am committed to educating and inspiring a diverse audience worldwide, making complex subjects accessible and engaging. Join me on Udemy, where I bring my extensive knowledge, practical experience, and unique teaching style to help you master new skills and advance your career.`;
-
+  const fullBio = tutor.aboutMe;
   const shortBio = fullBio.split('.')[0] + '.';
 
   return (
     <CardContent className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Instructor</h2>
+      <h2 className="text-2xl font-bold mb-4">Get To Know Your Instructor</h2>
       <div className="flex items-start mb-4">
-        <img src="/api/placeholder/100/100" alt="Hitesh Choudhary" className="w-24 h-24 rounded-full mr-4" />
+        <img src={tutor.avatarUrl} alt={tutor.name} className="w-24 h-24 rounded-full mr-4" />
         <div>
-          <h3 className="text-xl font-semibold">Hitesh Choudhary</h3>
-          <p className="text-gray-600">A teacher who loves to teach about Technology</p>
-          <div className="flex items-center mt-2">
-            <Star className="w-5 h-5 fill-yellow-400 stroke-yellow-400" />
-            <span className="ml-1 font-semibold">4.8 Instructor Rating</span>
-          </div>
-          <p className="text-gray-600">1,842 Reviews • 9,266 Students • 1 Course</p>
+          <h3 className="text-xl font-semibold">{tutor.name}</h3>
+          <p className="text-gray-600">{tutor.bio}</p>
         </div>
       </div>
       <p className="text-gray-700 mb-4">

@@ -300,7 +300,7 @@ export const getContentOfCourse = async (req: Request, res: Response): Promise<v
 };
 
 
-//get content of sections
+//get delete folder and its children
 export const getContentOfSection = async (req: Request, res: Response): Promise<void> => {
   const { folderId } = req.params;
 
@@ -326,6 +326,106 @@ export const getContentOfSection = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: 'An error occurred while fetching folder contents' });
   }
 };
+
+
+//delete subfolder
+export const deleteSubfolder = async (req: Request, res: Response): Promise<void> => {
+  const { folderId } = req.params;
+
+  try {
+    // Find the folder and all its nested children recursively
+    const folder = await prisma.content.findUnique({
+      where: { 
+        id: parseInt(folderId),
+        type: "folder"
+      },
+      include: {
+        children: {
+          include: {
+            children: true // This will get nested children as well
+          }
+        }
+      }
+    });
+
+    if (!folder) {
+      res.status(404).json({ error: 'Folder not found' });
+      return;
+    }
+
+    // Helper function to get all nested children
+    const getAllChildren = (content: any): any[] => {
+      let children: any[] = [...content.children];
+      for (const child of content.children) {
+        if (child.children) {
+          children = children.concat(getAllChildren(child));
+        }
+      }
+      return children;
+    };
+
+    // Get all nested children
+    const allChildren = getAllChildren(folder);
+
+    // Delete thumbnails from Cloudinary
+    for (const child of allChildren) {
+      if (child.thumbnail) {
+        const publicId = child.thumbnail
+          .split('/')
+          .slice(-4)
+          .join('/')
+          .split('.')[0];
+        try {
+          await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+        } catch (cloudinaryError) {
+          console.error(`Failed to delete thumbnail for content ${child.id}:`, cloudinaryError);
+          // Continue with deletion even if Cloudinary fails
+        }
+      }
+    }
+
+    // Delete the folder and all its children from the database
+    // The cascade delete will handle the children automatically
+    await prisma.content.delete({
+      where: {
+        id: parseInt(folderId)
+      }
+    });
+
+    res.json({ message: 'Folder and its contents deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting folder and contents:", error);
+    res.status(500).json({ error: 'An error occurred while deleting the folder and its contents' });
+  }
+};
+
+
+// Update content by ID
+export const updateSubfolder = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { folderId } = req.params;
+    const { title, description } = req.body;
+
+    const updatedContent = await prisma.content.update({
+      where: { id: parseInt(folderId) },
+      data: {
+        title,
+        description,
+      },
+    });
+
+    res.json({
+      message: 'Folder updated successfully!',
+      content: updatedContent,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while updating the content' });
+  }
+};
+
+  
+
 
 
 

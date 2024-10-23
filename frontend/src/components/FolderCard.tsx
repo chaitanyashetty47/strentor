@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axios from 'axios';
-import { Link , useParams} from 'react-router-dom';
+import { Link} from 'react-router-dom';
 import { useUser } from "@/hooks/useUser";
 
 interface FolderCardProps {
   folder: Folders;
   courseId?: string | undefined;
   onDelete?: () => void;
-  onUpdate?: () => void;
+  onUpdate?: (folder: Folders) => void;
 }
 
 export default function FolderCard({ folder, onDelete, onUpdate, courseId }: FolderCardProps) {
@@ -24,7 +24,7 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
   const handleDelete = async () => {
     try {
       //console.log(`http://localhost:3000/content/${folder.id}`)
-      await axios.delete(`http://localhost:3000/content/${folder.id}`, {
+      await axios.delete(`http://localhost:3000/content/delete-subfolder/${folder.id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -39,7 +39,7 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
   };
 
   return (
-    <Card className="w-full max-w-sm bg-blue-600 text-white overflow-hidden ">
+    <Card className="w-full max-w-sm bg-purple-800 text-white overflow-hidden ">
       <Link to = {`/admin/course/${courseId}/folder/${folder.id}`} >
       <CardContent className="p-6 relative">
         <div className="absolute top-0 right-0 left-0 h-16 bg-gradient-to-br from-white/20 to-transparent rounded-tr-lg" />
@@ -52,7 +52,7 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
         </div>
       </CardContent>
       </Link>
-      <div className="bg-blue-700 p-4 flex justify-between items-center">
+      <div className="bg-purple-900 p-4 flex justify-between items-center">
         <Folder />
         
           <DropdownMenu>
@@ -63,9 +63,9 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               { 
-                <DropdownMenuItem onClick={onUpdate}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  <span>Update</span>
+                <DropdownMenuItem onClick={() => onUpdate?.(folder)}>
+                <Edit className="mr-2 h-4 w-4" />
+                <span>Update</span>
                 </DropdownMenuItem>
               }
               {

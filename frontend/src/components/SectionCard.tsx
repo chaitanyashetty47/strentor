@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axios from 'axios';
-import { Link , useParams} from 'react-router-dom';
+import UpdateContentForm from "@/components/adminupload/UpdateContentForm"
 import { useUser } from "@/hooks/useUser";
+import { BACKEND_URL } from "@/lib/config";
 
 interface FolderCardProps {
   folder: Folders;
@@ -18,13 +19,12 @@ interface FolderCardProps {
 
 export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const {accessToken} = useUser();
-  //const {courseId} = useParams();
 
   const handleDelete = async () => {
     try {
-      //console.log(`http://localhost:3000/content/${folder.id}`)
-      await axios.delete(`http://localhost:3000/content/${folder.id}`, {
+      await axios.delete(`${BACKEND_URL}/content/${folder.id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -63,7 +63,7 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               { 
-                <DropdownMenuItem onClick={onUpdate}>
+                <DropdownMenuItem onClick={() => setIsUpdateModalOpen(true)}>
                   <Edit className="mr-2 h-4 w-4" />
                   <span>Update</span>
                 </DropdownMenuItem>
@@ -73,6 +73,7 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
                   <Trash className="mr-2 h-4 w-4" />
                   <span>Delete</span>
                 </DropdownMenuItem>
+                
               }
             </DropdownMenuContent>
           </DropdownMenu>
@@ -97,6 +98,24 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
               </Button>
             </DialogFooter>
           </DialogContent>
+        </Dialog>
+        <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+            <DialogContent className="sm:max-w-[425px] bg-white">
+              <DialogTitle>Update Content</DialogTitle>
+              <UpdateContentForm
+                contentId={folder.id}
+                initialData={{
+                  title: folder.title,
+                  description: folder.description,
+                  type: folder.type
+                }}
+                onUpdateComplete={() => {
+                  setIsUpdateModalOpen(false);
+                  if (onUpdate) onUpdate();
+                }}
+                onCancel={() => setIsUpdateModalOpen(false)}
+              />
+           </DialogContent>
         </Dialog>
       
     </Card>

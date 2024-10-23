@@ -29,9 +29,11 @@ model Course {
   title           String
   imageUrl        String
   description     String
+  duration        String
+  level           String
   openToEveryone  Boolean          @default(false)
-  slug            String           @unique
-  discordOauthUrl String           @default("")
+  slug            String?           @unique
+  discordOauthUrl String?           @default("")
   certIssued      Boolean          @default(false)
   createdById     Int
   createdAt       DateTime         @default(now())
@@ -54,7 +56,7 @@ model Content {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   notionMetadataId Int?
-  parent           Content?        @relation("ContentToContent", fields: [parentId], references: [id])
+  parent           Content?        @relation("ContentToContent", fields: [parentId], references: [id], onDelete: Cascade)
   children         Content[]       @relation("ContentToContent")
   courses          CourseContent[]
 }
@@ -104,3 +106,5 @@ enum Role {
   USER
   TUTOR
 }
+
+

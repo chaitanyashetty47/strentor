@@ -23,7 +23,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchUser = async () => {
       const { data: { session }, error } = await supabase.auth.getSession(); // Fetch session
       if (error) console.error("Error fetching session:", error);
-      console.log("Fetched session: ", session);
+      // console.log("Fetched session: ", session);
       setUser(session?.user ?? null);
       setAccessToken(session?.access_token ?? null);
     };

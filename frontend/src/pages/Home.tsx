@@ -29,7 +29,7 @@ export default function Home (){
        <Header />
        {/* Home
        <CourseCard/> */}
-       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8 justify-items-center">
         {courses.map((course) => (
           <CourseCard key={course.id} course={course} />
         ))}

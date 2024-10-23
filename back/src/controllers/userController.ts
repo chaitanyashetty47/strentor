@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient, Role } from '@prisma/client';
 import cloudinary from '../config/cloudinary';
-import multer from 'multer';
+
 
 const prisma = new PrismaClient();
 
@@ -39,10 +39,7 @@ const prisma = new PrismaClient();
 export const createOrUpdateUser =  async (req: Request, res: Response): Promise<void> => {
     try {
       const { supabaseId, email, role, name, bio, aboutMe } = req.body;
-      console.log("Request body:", req.body);
-      console.log("Name: ", req.body.name);
-      console.log("Bio", req.body.bio);
-      console.log("About Me: ", req.body.aboutMe);
+ 
 
       const file = req.file;
 
@@ -142,3 +139,42 @@ export const getUserCourse = async (req: Request, res: Response):Promise<void> =
     await prisma.$disconnect();
   }
 }
+
+//get user by id
+
+export const getUserById = async (req: Request, res:Response):Promise<void> =>{
+  try{
+    const { userId } = req.params;
+
+    if (!userId) {
+      res.status(400).json({ error: 'User ID is required' });
+      return;
+    }
+    const user = await prisma.users.findUnique({
+      where: { id: parseInt(userId) },
+      select: {
+        name:true,
+        aboutMe:true,
+        avatarUrl:true,
+        bio:true,
+    }
+
+    
+  });
+
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+   res.status(200).json(user);
+    return;
+
+  }
+  catch(error){
+    console.error('Error getting all users:', error);
+    res.status(500).json({ error: 'Failed to fetch the user' });
+  }
+
+}
+

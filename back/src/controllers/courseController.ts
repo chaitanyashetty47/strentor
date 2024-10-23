@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient, Role } from '@prisma/client';
+import cloudinary from '../config/cloudinary';
 
 declare global {
   namespace Express {
@@ -21,7 +22,8 @@ const prisma = new PrismaClient();
 //Create a new course (Tutor or Admin only)
 export const createCourse = async (req: Request, res: Response):Promise<void> => {
   try {
-    const { title, imageUrl, description, openToEveryone, slug, discordOauthUrl } = req.body;
+    const { title, description, level, duration } = req.body;
+    const file = req.file;
     const createdById = req.user?.id;
 
     if (!createdById) {
@@ -37,14 +39,27 @@ export const createCourse = async (req: Request, res: Response):Promise<void> =>
       return;
     }
 
+    if (!file) {
+      res.status(400).send("No photo uploaded.");
+      return;
+    }
+
+    // Upload file to Cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      resource_type: "auto",
+      folder: `course`,
+    });
+
+    const imageUrl = result.secure_url
+
     const course = await prisma.course.create({
       data: {
         title,
         imageUrl,
         description,
-        openToEveryone,
-        slug,
-        discordOauthUrl,
+        duration,
+        level,
+        openToEveryone: true,
         createdBy: { connect: { id: createdByIdNumber } }
       }
     });
@@ -106,6 +121,28 @@ export const getCourses = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching courses:', error);
     res.status(500).json({ error: 'Failed to fetch courses' });
+  }
+};
+
+//get  courses by id
+
+export const getCourseById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await prisma.course.findUnique({
+      where: { id: parseInt(courseId) },
+    });
+
+    if (!course) {
+      res.status(404).json({ error: 'Course not found' });
+      return;
+    }
+
+    res.json(course);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while fetching the course' });
   }
 };
 
