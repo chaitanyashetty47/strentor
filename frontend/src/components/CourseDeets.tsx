@@ -90,14 +90,22 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
         )}
 
         <div className="mt-6 pt-3">
-          <Button
-            onClick={() => setShowDialog(true)}
-            disabled={loading || joining}
-            className={`px-4 py-2 font-semibold rounded-md transition ${
-              isEnrolled || loading || joining
-                ? "bg-gray-400 "
-                : "bg-purple-600 text-white hover:bg-purple-700"
-            }`}
+        <Button
+  onClick={() => {
+    if (isEnrolled) {
+      // Navigate directly to course content if the user is enrolled
+      navigate(`/course/${course.id}/detail`);
+    } else {
+      // Show the dialog to join the course if the user is not enrolled
+      setShowDialog(true);
+    }
+  }}
+  disabled={loading || joining}
+  className={`px-4 py-2 font-semibold rounded-md transition ${
+    isEnrolled || loading || joining
+      ? "bg-gray-400 "
+      : "bg-purple-600 text-white hover:bg-purple-700"
+  }`}
           >
             {loading || joining ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -107,6 +115,7 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
               "Join Course"
             )}
           </Button>
+
         </div>
 
         {/* Confirmation Dialog */}

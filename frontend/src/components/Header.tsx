@@ -30,7 +30,7 @@ export default function Header({ onSearch }: HeaderProps) {
   };
 
   // Check if the current path is Playground or Booking, and hide search bar accordingly
-  const hideSearchBar = location.pathname.includes('/course') || location.pathname.includes('/detail') || location.pathname.includes('/profile');
+  const hideSearchBar = location.pathname.includes('/course') || location.pathname.includes('/detail') || location.pathname.includes('/profile') || location.pathname.includes('/admin');
 
   return (
     <header className="flex items-center justify-between h-16 px-4 bg-background border-b md:px-6">
@@ -45,7 +45,7 @@ export default function Header({ onSearch }: HeaderProps) {
           <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             type="search"
-            placeholder="Search turfs..."
+            placeholder="Search courses..."
             className="w-full pl-8 rounded-lg"
             onChange={handleSearchInput}
           />
