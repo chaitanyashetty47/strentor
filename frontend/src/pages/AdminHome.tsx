@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Header from "@/components/Header";
+import AdminHeader from "@/components/AdminHeader";
 import AdminCard from "@/components/AdminCard";
 import AddCourseForm from "@/components/adminupload/AddCourseForm";
 import { BACKEND_URL } from "@/lib/config";
@@ -14,8 +14,8 @@ export default function Home() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { accessToken } = useUser();
-
 
   const fetchCourses = async () => {
     try {
@@ -30,15 +30,14 @@ export default function Home() {
       setError('An unexpected error occurred');
       setCourses([]);
       console.error("Error fetching Courses:", error)
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [refreshTrigger]);
 
   const handleAddCourse = () => {
     setIsAddModalOpen(true);
@@ -49,7 +48,7 @@ export default function Home() {
   };
 
   const handleCourseAdded = () => {
-    fetchCourses(); // Refresh the course list
+    fetchCourses();
   };
 
   if (loading) {
@@ -60,15 +59,13 @@ export default function Home() {
     );
   }
 
-  // Error state
   if (error) {
     return (
-      
       <div className="flex flex-col justify-center items-center min-h-screen">
-        <Header/>
+        <AdminHeader />
         <div className="text-red-500 mb-4">{error}</div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => window.location.reload()}
         >
           Try Again
@@ -78,36 +75,47 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <Header />
+    <div className="min-h-screen bg-gray-50">
+      <AdminHeader />
       
-      <div className="flex justify-end mt-4 mr-4">
-        <Button 
-          className="bg-purple-600 hover:bg-purple-700 text-white"
-          onClick={handleAddCourse}
-        >
-          Add New Course
-        </Button>
-      </div>
-
-      {!courses.length ? (
-        <div className="flex justify-center items-center mt-12 text-xl text-gray-600">
-          Get Started and Add a Course!
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-end mb-8">
+          <Button
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={handleAddCourse}
+          >
+            Add New Course
+          </Button>
         </div>
-      ) : (
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 justify-items-center">
-          {courses.map((course) => (
-            <AdminCard key={course.id} course={course} />
-          ))}
-        </div>
-      )}
 
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent>
-          <DialogTitle>Add New Course</DialogTitle>
-          <AddCourseForm onClose={handleCloseModal} onCourseAdded={handleCourseAdded} />
-        </DialogContent>
-      </Dialog>
+        {!courses.length ? (
+          <div className="flex justify-center items-center py-16">
+            <p className="text-xl text-gray-600">
+              Get Started and Add a Course!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 justify-items-center">
+            {courses.map((course) => (
+              <AdminCard
+                key={course.id}
+                course={course}
+                onUpdate={() => setRefreshTrigger(prev => prev + 1)}
+              />
+            ))}
+          </div>
+        )}
+
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogTitle>Add New Course</DialogTitle>
+            <AddCourseForm 
+              onClose={handleCloseModal} 
+              onCourseAdded={handleCourseAdded} 
+            />
+          </DialogContent>
+        </Dialog>
+      </main>
     </div>
   );
 }

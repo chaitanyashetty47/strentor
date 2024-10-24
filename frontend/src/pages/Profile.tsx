@@ -78,6 +78,8 @@ const LearningDashboard = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
+      <Header/>
+
       <div className="bg-gray-900 py-8 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-6">My learning</h1>
@@ -89,12 +91,7 @@ const LearningDashboard = () => {
               >
                 All courses
               </TabsTrigger>
-              <TabsTrigger 
-                value="my-lists"
-                className="text-gray-300 hover:text-white data-[state=active]:text-black data-[state=active]:border-b-2 data-[state=active]:border-white"
-              >
-                My Lists
-              </TabsTrigger>
+     
               <TabsTrigger 
                 value="wishlist"
                 className="text-gray-300 hover:text-white data-[state=active]:text-black data-[state=active]:border-b-2 data-[state=active]:border-white"
@@ -107,12 +104,7 @@ const LearningDashboard = () => {
               >
                 Archived
               </TabsTrigger>
-              <TabsTrigger 
-                value="learning-tools"
-                className="text-gray-300 hover:text-white data-[state=active]:text-black data-[state=active]:border-b-2 data-[state=active]:border-white"
-              >
-                Learning tools
-              </TabsTrigger>
+      
             </TabsList>
           </Tabs>
         </div>

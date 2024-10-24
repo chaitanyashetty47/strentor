@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"
+import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
-// import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
 
@@ -37,7 +36,6 @@ type SignupData = {
   role?: Role;
   bio?: string;
   aboutMe?: string;
-  profilePic?: FileList;
 }
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
@@ -50,17 +48,15 @@ const supabase: SupabaseClient = createClient(
 export default function Auth() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
-  const [imageError, setImageError] = useState<string | null>(null)
   const { control, register, handleSubmit, formState: { errors }, watch, reset } = useForm<SignupData>()
   const navigate = useNavigate()
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isLoading, setIsLoading] = useState(false)
   const {toast} = useToast()
 
   const watchRole = watch("role")
 
   const onSubmit = async (data: SignupData) => {
-    setIsLoading(true); // Show loader while processing
+    setIsLoading(true);
     try {
       let authData
       let error
@@ -83,71 +79,56 @@ export default function Auth() {
 
       if (error) throw error
 
-      console.log(isSignUp ? 'Sign up successful' : 'Sign in successful')
-
       if (authData && authData.user) {
         if (isSignUp) {
-          const formData = new FormData();
-          formData.append('supabaseId', authData.user.id);
-          formData.append('email', data.email);
-          formData.append('role', data.role || 'USER'); 
-          formData.append('name', data.name || '');
-    
-          if (data.profilePic && data.profilePic[0]) {
-            formData.append('file', data.profilePic[0]);
-          }
-    
+          const userData = {
+            supabaseId: authData.user.id,
+            email: data.email,
+            role: data.role || 'USER',
+            name: data.name || '',
+            ...(data.role === Role.TUTOR && {
+              bio: data.bio,
+              aboutMe: data.aboutMe
+            })
+          };
+
           if (data.role === Role.TUTOR) {
-            formData.append('bio', data.bio || '');
-            formData.append('aboutMe', data.aboutMe || '');
+            if (!data.bio) throw new Error('Bio is required for tutors');
+            if (!data.aboutMe) throw new Error('About Me is required for tutors');
           }
-    
-          await axios.post(`${BACKEND_URL}/users`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
+
+          const response = await axios.post(`${BACKEND_URL}/users`, userData);
+          console.log('Server response:', response.data);
         }
 
         toast({
           title: isSignUp ? "Sign up successful" : "Sign in successful",
           description: "Redirecting to home page...",
+          duration: 2000,
         })
 
-        // Navigate to home page immediately after successful sign-up/sign-in
         navigate('/home')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error during ${isSignUp ? 'sign up' : 'sign in'} process:`, error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: `Failed to ${isSignUp ? 'sign up' : 'sign in'}. Please try again.`,
+        description: error.message || `Failed to ${isSignUp ? 'sign up' : 'sign in'}. Please try again.`,
       })
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setImageError("File size exceeds 2MB limit")
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''
-        }
-      } else {
-        setImageError(null)
-      }
-    }
-  }
-
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp)
-    reset() // Reset form when switching between sign up and sign in
+    reset()
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+      <span className="font-semibold font-mono text-4xl p-2">Courshala</span>
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle>
@@ -223,7 +204,6 @@ export default function Auth() {
                       <SelectContent position="popper">
                         <SelectItem value={Role.USER}>USER</SelectItem>
                         <SelectItem value={Role.TUTOR}>TUTOR</SelectItem>
-                        <SelectItem value={Role.ADMIN}>ADMIN</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -256,21 +236,6 @@ export default function Auth() {
                   {errors.aboutMe && <p className="mt-1 text-xs text-red-500">{errors.aboutMe.message}</p>}
                 </div>
               </>
-            )}
-            {isSignUp && (
-              <div>
-                <label htmlFor="profilePic" className="block text-sm font-medium text-gray-700">Upload Profile Picture (Max 2MB)</label>
-                <input
-                  type="file"
-                  id="profilePic"
-                  accept="image/*"
-                  {...register("profilePic")}
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                  className={`w-full border-gray-300 ${imageError ? 'border-red-500' : ''}`}
-                />
-                {imageError && <p className="mt-1 text-xs text-red-500">{imageError}</p>}
-              </div>
             )}
             <div className="flex items-center justify-between">
               <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={isLoading}>

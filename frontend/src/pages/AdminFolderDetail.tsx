@@ -1,9 +1,9 @@
-import Header from "@/components/Header"
+import AdminHeader from "@/components/AdminHeader";
 import { useState, useEffect } from "react";
 import { BACKEND_URL } from "@/lib/config";
 import { Folders } from "@/types/types";
-import { useParams } from "react-router-dom";
-import { Upload } from 'lucide-react';
+import { useParams, useNavigate } from "react-router-dom";
+import { Upload, ArrowLeft } from 'lucide-react';
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ export default function AdminFolderDetail() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleOpenModal = () => {
     setIsAddModalOpen(true);
@@ -46,15 +47,14 @@ export default function AdminFolderDetail() {
       } catch (error) {
         setError('An unexpected error occurred');
         setFolders([]);
-      console.error("Error fetching Courses:", error)
-      }finally{
+        console.error("Error fetching Courses:", error);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchFolders();
   }, [courseId, folderId, accessToken, refreshTrigger]);
-
 
   if (loading) {
     return (
@@ -67,9 +67,8 @@ export default function AdminFolderDetail() {
   // Error state
   if (error) {
     return (
-      
       <div className="flex flex-col justify-center items-center min-h-screen">
-        <Header/>
+        <AdminHeader />
         <div className="text-red-500 mb-4">{error}</div>
         <Button 
           variant="outline" 
@@ -83,17 +82,34 @@ export default function AdminFolderDetail() {
 
   return (
     <div>
-      <Header />
-      <div className="flex justify-end mt-4 mr-4">
-        <Button 
-          variant="ghost" 
-          className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 px-4 py-2"
-          onClick={handleOpenModal}
-        >
-          <Upload className="h-4 w-4" />
-          <span>Upload Content</span>
-        </Button>
+      <AdminHeader />
+
+      
+      <div className="flex justify-between mx-auto my-auto">
+        <div className="ml-4 mt-4">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2 px-2 py-1 bg-transparent"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-5 w-5 text-black" />
+            <span className="text-black">Back</span>
+          </Button>
+        </div>
+
+        <div className="mr-4 mt-4">
+          <Button 
+            variant="ghost" 
+            className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 px-4 py-2"
+            onClick={handleOpenModal}
+          >
+            <Upload className="h-4 w-4" />
+            <span>Upload Content</span>
+          </Button>
+        </div>
+
       </div>
+      
 
       {/* Conditional Rendering for Folders */}
       {folders.length === 0 ? (
@@ -132,4 +148,3 @@ export default function AdminFolderDetail() {
     </div>
   );
 }
-

@@ -12,7 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { BACKEND_URL } from "@/lib/config";
 import { useUser } from '@/hooks/useUser';
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, Trash2} from "lucide-react";
 
 interface AddCourseFormProps {
   onClose: () => void;
@@ -23,6 +23,21 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
   const { register, control, handleSubmit, formState: { errors } } = useForm();
   const { accessToken } = useUser();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
@@ -31,8 +46,9 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
     formData.append('level', data.level);
     formData.append('duration', data.duration);
     formData.append('description', data.description);
-    if (data.file[0]) {
-      formData.append('file', data.file[0]);
+
+    if (selectedFile) {
+      formData.append('file', selectedFile);
     }
 
     try {
@@ -49,11 +65,9 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
         onClose();
       } else {
         console.error('Failed to add course');
-        // Optionally, you can add error handling here to show an error message to the user
       }
     } catch (error) {
       console.error('Error adding course:', error);
-      // Optionally, you can add error handling here to show an error message to the user
     } finally {
       setIsLoading(false);
     }
@@ -99,14 +113,66 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
       />
       {errors.description && <span className="text-red-500">{errors.description.message?.toString() || 'Invalid Description'}</span>}
 
-      <Input
-        {...register("file")}
-        type="file"
-        accept="image/*"
-      />
+      <div className="space-y-4">
+        {!previewUrl ? (
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-purple-500 transition-colors">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="thumbnail-input"
+            />
+            <label 
+              htmlFor="thumbnail-input" 
+              className="flex flex-col items-center gap-2 cursor-pointer"
+            >
+              <Upload className="h-8 w-8 text-gray-400" />
+              <span className="text-sm font-medium text-gray-600">
+                Add course thumbnail
+              </span>
+              <span className="text-xs text-gray-400">
+                SVG, PNG, JPG or GIF (max. 2MB)
+              </span>
+            </label>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <div className="relative group w-32">
+              <img 
+                src={previewUrl} 
+                alt="Thumbnail Preview" 
+                className="w-32 h-32 object-cover rounded-lg"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={handleRemoveFile}
+                className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label 
+                htmlFor="thumbnail-input" 
+                className="text-sm font-medium text-purple-600 cursor-pointer hover:text-purple-700"
+              >
+                Change thumbnail
+              </label>
+              <span className="text-xs text-gray-400">
+                SVG, PNG, JPG or GIF (max. 2MB)
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
 
-      <div className="flex justify-end space-x-2">
-        <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>Cancel</Button>
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+          Cancel
+        </Button>
         <Button type="submit" disabled={isLoading} className='bg-purple-600 hover:bg-purple-700'>
           {isLoading ? (
             <>

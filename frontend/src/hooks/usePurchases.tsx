@@ -18,7 +18,7 @@ interface PurchasedCourse extends Course {
   purchasedAt: string;
 }
 
-interface User {
+interface UserPurchases {
   id: number;
   name: string;
   email: string;
@@ -29,7 +29,7 @@ interface User {
 
 export const usePurchases = () => {
   const { user, accessToken } = useUser();
-  const [purchases, setPurchases] = useState<User>();
+  const [purchases, setPurchases] = useState<UserPurchases>();
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

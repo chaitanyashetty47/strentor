@@ -139,7 +139,7 @@ export const createCourse = async (req: Request, res: Response): Promise<void> =
 export const updateCourse = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, imageUrl, description, openToEveryone, slug, discordOauthUrl } = req.body;
+    const { title, imageUrl, description, level, duration } = req.body;
 
     const course = await prisma.course.update({
       where: { id: parseInt(id) },
@@ -147,9 +147,8 @@ export const updateCourse = async (req: Request, res: Response) => {
         title,
         imageUrl,
         description,
-        openToEveryone,
-        slug,
-        discordOauthUrl
+        level,
+        duration
       }
     });
 

@@ -1,4 +1,4 @@
-import Header from "@/components/Header"
+import AdminHeader from "@/components/AdminHeader"
 import FolderCard from "@/components/FolderCard"
 import { useState, useEffect } from "react"
 import { BACKEND_URL } from "@/lib/config"
@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import AddFolderForm from "@/components/adminupload/AddFolderForm"
 import UpdateFolderForm from "@/components/adminupload/UpdateFolderForm"
 import axios from "axios"
+import { Upload, ArrowLeft } from 'lucide-react';
+import { useNavigate } from "react-router-dom"
+
 
 export default function AdminCourseDetail() {
   const [folders, setFolders] = useState<Folders[]>([])
@@ -21,6 +24,7 @@ export default function AdminCourseDetail() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleDelete = (deletedFolderId: number) => {
     setFolders(prevFolders => prevFolders.filter(folder => folder.id !== deletedFolderId))
@@ -84,7 +88,7 @@ export default function AdminCourseDetail() {
     return (
       
       <div className="flex flex-col justify-center items-center min-h-screen">
-        <Header/>
+        <AdminHeader/>
         <div className="text-red-500 mb-4">{error}</div>
         <Button 
           variant="outline" 
@@ -98,18 +102,32 @@ export default function AdminCourseDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <AdminHeader />
       
       {/* Add Button Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex justify-end">
-          <Button
-            className="bg-purple-600 hover:bg-purple-700 text-white shadow-sm"
-            onClick={handleOpenModal}
+      <div className="flex justify-between p-5">
+        <div className="ml-4 mt-4">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2 px-2 py-1 bg-transparent"
+            onClick={() => navigate(-1)}
           >
-            Add New Section
+            <ArrowLeft className="h-5 w-5 text-black" />
+            <span className="text-black">Back</span>
           </Button>
         </div>
+
+        <div className="mr-4 mt-4">
+          <Button 
+            variant="ghost" 
+            className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 px-4 py-2"
+            onClick={handleOpenModal}
+          >
+            <Upload className="h-4 w-4" />
+            <span>Upload Content</span>
+          </Button>
+        </div>
+
       </div>
 
       {/* Cards Grid Container */}

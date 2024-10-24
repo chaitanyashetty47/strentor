@@ -56,53 +56,27 @@ const prisma = new PrismaClient();
 export const createOrUpdateUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { supabaseId, email, role, name, bio, aboutMe } = req.body;
-    const file = req.file;
 
-    // Handle file upload if a file is provided
-    if (!file) {
-      res.status(400).send("No file uploaded.");
-      return;
-    }
+    // Upsert user in the database
+    const user = await prisma.users.upsert({
+      where: { supabaseId },
+      update: {
+        email,
+        name,
+        role,
+        ...(role === 'TUTOR' && { bio, aboutMe }), // Conditionally add bio and aboutMe if the role is TUTOR
+      },
+      create: {
+        supabaseId,
+        email,
+        name,
+        role,
+        bio: role === 'TUTOR' ? bio : undefined,
+        aboutMe: role === 'TUTOR' ? aboutMe : undefined,
+      },
+    });
 
-    // Upload file to Cloudinary using buffer from memory
-    const result = await cloudinary.uploader.upload_stream(
-      { resource_type: "auto", folder: `users` },
-      async (error, result) => {
-        if (error) {
-          console.error('Cloudinary Upload Error:', error);
-          res.status(500).send('Failed to upload file to Cloudinary');
-          return;
-        }
-
-        const imageUrl = result?.secure_url!;
-
-        // Upsert user in the database
-        const user = await prisma.users.upsert({
-          where: { supabaseId },
-          update: {
-            email,
-            name,
-            avatarUrl: imageUrl, // Only update if a new image is uploaded
-            role,
-            ...(role === 'TUTOR' && { bio, aboutMe }), // Conditionally add bio and aboutMe if the role is TUTOR
-          },
-          create: {
-            supabaseId,
-            email,
-            name,
-            avatarUrl: imageUrl,
-            role,
-            bio: role === 'TUTOR' ? bio : undefined,
-            aboutMe: role === 'TUTOR' ? aboutMe : undefined,
-          },
-        });
-
-        res.status(200).json(user);
-      }
-    );
-
-    // Pipe the file buffer to Cloudinary upload stream
-    result.end(file.buffer);
+    res.status(200).json(user);
   } catch (error) {
     console.error('Error creating/updating user:', error);
     res.status(500).json({ error: 'Failed to create/update user' });
