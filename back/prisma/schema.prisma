@@ -40,7 +40,7 @@ model Course {
   updatedAt       DateTime         @updatedAt
   certificate     Certificate[]
   createdBy       Users            @relation("CreatedCourses", fields: [createdById], references: [id])
-  content         CourseContent[]
+  content         CourseContent[]  
   Review          Review[]
   purchasedBy     UsersPurchases[]
 }
@@ -58,7 +58,7 @@ model Content {
   notionMetadataId Int?
   parent           Content?        @relation("ContentToContent", fields: [parentId], references: [id], onDelete: Cascade)
   children         Content[]       @relation("ContentToContent")
-  courses          CourseContent[]
+  courses          CourseContent[] 
 }
 
 model CourseContent {
@@ -74,7 +74,7 @@ model UsersPurchases {
   UsersId     Int
   courseId    Int
   purchasedAt DateTime @default(now())
-  Users       Users    @relation(fields: [UsersId], references: [id])
+  Users       Users    @relation(fields: [UsersId], references: [id], onDelete: Cascade)
   course      Course   @relation(fields: [courseId], references: [id])
 
   @@id([UsersId, courseId])

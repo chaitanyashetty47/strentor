@@ -160,10 +160,20 @@ export const updateCourse = async (req: Request, res: Response) => {
 };
 
 // Delete a course (Tutor or Admin only)
-export const deleteCourse =  async (req: Request, res: Response) => {
+export const deleteCourse = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
+    // Delete all related CourseContent entries first
+    await prisma.courseContent.deleteMany({
+      where: { courseId: parseInt(id) }
+    });
+
+    await prisma.usersPurchases.deleteMany({
+      where: { courseId: parseInt(id) }
+    })
+
+    // Now delete the course
     await prisma.course.delete({
       where: { id: parseInt(id) }
     });

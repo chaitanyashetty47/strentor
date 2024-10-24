@@ -93,7 +93,6 @@ export default function UpdateContentForm({ contentId, initialData, onUpdateComp
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pdf">PDF</SelectItem>
                   <SelectItem value="video">Video</SelectItem>
                 </SelectContent>
               </Select>

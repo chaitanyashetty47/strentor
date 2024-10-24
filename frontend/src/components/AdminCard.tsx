@@ -5,7 +5,7 @@ import { Courses } from "@/types/types";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { User, MoreVertical, Trash, Edit } from "lucide-react";
+import { User, MoreVertical, Trash, Edit, Loader2 } from "lucide-react";
 import useTutor from "@/hooks/useTutor";
 import { BACKEND_URL } from "@/lib/config";
 import UpdateCourseForm from "@/components/adminupload/UpdateCourseForm"
@@ -34,10 +34,12 @@ interface CoursesCardProps {
 export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false); // New loading state for delete
   const { accessToken } = useUser();
 
   const handleDelete = async (e:any) => {
     e.stopPropagation();
+    setIsDeleting(true); // Start loading
     try {
       await axios.delete(`${BACKEND_URL}/course/delete/${course.id}`, {
         headers: {
@@ -50,6 +52,8 @@ export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) 
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting course:", error);
+    } finally {
+      setIsDeleting(false); // Stop loading
     }
   };
 
@@ -141,8 +145,19 @@ export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) 
               <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                Delete
+              <Button 
+                variant="destructive" 
+                onClick={handleDelete} 
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -150,8 +165,8 @@ export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) 
 
         <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
           <DialogContent 
-          className="sm:max-w-[425px] bg-white"
-          onClick={(e) => e.stopPropagation()}>
+            className="sm:max-w-[425px] bg-white"
+            onClick={(e) => e.stopPropagation()}>
             <DialogTitle>Update Course</DialogTitle>
             <UpdateCourseForm
               courseId={course.id}

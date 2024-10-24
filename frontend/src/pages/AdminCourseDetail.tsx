@@ -124,7 +124,7 @@ export default function AdminCourseDetail() {
             onClick={handleOpenModal}
           >
             <Upload className="h-4 w-4" />
-            <span>Upload Content</span>
+            <span>Add Section</span>
           </Button>
         </div>
 
@@ -159,7 +159,7 @@ export default function AdminCourseDetail() {
       {/* Modals */}
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogTitle>Add New Course</DialogTitle>
+          <DialogTitle>Add New Section</DialogTitle>
           <AddFolderForm onClose={handleCloseModal} onCourseAdded={handleFolderAdded} />
         </DialogContent>
       </Dialog>

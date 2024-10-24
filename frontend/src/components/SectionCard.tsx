@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Folders } from "@/types/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Folder, MoreVertical, Trash, Edit } from 'lucide-react';
+import { Folder, MoreVertical, Trash, Edit, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axios from 'axios';
-import UpdateContentForm from "@/components/adminupload/UpdateContentForm"
+import UpdateContentForm from "@/components/adminupload/UpdateContentForm";
 import { useUser } from "@/hooks/useUser";
 import { BACKEND_URL } from "@/lib/config";
 
@@ -20,9 +20,11 @@ interface FolderCardProps {
 export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { accessToken } = useUser();
 
   const handleDelete = async () => {
+    setIsDeleting(true);
     try {
       await axios.delete(`${BACKEND_URL}/content/${folder.id}`, {
         headers: {
@@ -35,6 +37,8 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
       setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting folder:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -61,18 +65,14 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            { 
-              <DropdownMenuItem onClick={() => setIsUpdateModalOpen(true)}>
-                <Edit className="mr-2 h-4 w-4" />
-                <span>Update</span>
-              </DropdownMenuItem>
-            }
-            {
-              <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
-                <Trash className="mr-2 h-4 w-4" />
-                <span>Delete</span>
-              </DropdownMenuItem>
-            }
+            <DropdownMenuItem onClick={() => setIsUpdateModalOpen(true)}>
+              <Edit className="mr-2 h-4 w-4" />
+              <span>Update</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
+              <Trash className="mr-2 h-4 w-4" />
+              <span>Delete</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -89,8 +89,15 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -108,7 +115,7 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
             }}
             onUpdateComplete={() => {
               setIsUpdateModalOpen(false);
-              if (onUpdate) onUpdate(); // Call onUpdate when the update is complete
+              if (onUpdate) onUpdate();
             }}
             onCancel={() => setIsUpdateModalOpen(false)}
           />
