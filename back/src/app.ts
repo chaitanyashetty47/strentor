@@ -4,6 +4,7 @@ import courseRoutes from './routes/courseRoutes';
 import contentRoutes from './routes/contentRoutes';
 import  userPurchasesRoutes  from './routes/userPurchasesRoutes';
 import userRoutes from './routes/userRoutes';
+import healthRoutes from './routes/healthRoutes';
 import { setUserMiddleware } from './middleware/auth';
 
 const app = express();
@@ -26,6 +27,10 @@ app.use(express.json());
 
 // Apply authentication middleware to all routes
 // app.use(authMiddleware);
+
+// Health check routes before authentication middleware
+app.use('/health', healthRoutes);
+
 
 // Set user information for authenticated requests
 app.use(setUserMiddleware);

@@ -214,3 +214,18 @@ export const getCoursesCreatedByUser = async (req: Request, res: Response): Prom
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
+  export const checkUserEmail =  async (req:Request, res:Response): Promise<void> => {
+  const user = await prisma.users.findUnique({
+    where: { email: req.params.email }
+  });
+  
+  if (user) {
+    res.json({ exists: true });
+    return;
+  }
+  
+  res.status(404).json({ exists: false });
+};
