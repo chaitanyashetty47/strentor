@@ -13,13 +13,24 @@ export default function Instructor({ tutor, tutorLoading }: InstructorProps) {
   const [showFullBio, setShowFullBio] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  if (tutorLoading) {
+  // Show skeleton while loading OR when tutor data is not yet available
+  if (tutorLoading || (!tutor && tutorLoading)) {
     return <Skeleton />;
   }
 
-  if (!tutor) {
-    return <div>No Instructor Details Available</div>;
+  // Only show no details message when we're certain there's no tutor data and we're not loading
+  if (!tutor && !tutorLoading) {
+    return (
+      <CardContent className="p-6">
+        <div className="text-center text-gray-600">
+          
+        </div>
+      </CardContent>
+    );
   }
+
+  // Make sure we have tutor data before accessing its properties
+  if (!tutor) return null;
 
   const fullBio = tutor.aboutMe;
   const shortBio = fullBio.split('.')[0] + '.';
