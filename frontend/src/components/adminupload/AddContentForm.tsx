@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { useToast } from "@/hooks/use-toast"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2, Upload, X } from "lucide-react";
 import { BACKEND_URL } from "@/lib/config";
@@ -26,6 +26,7 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { accessToken } = useUser();
+  const {toast} = useToast()
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -78,6 +79,12 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
       });
 
       if (!response.ok) throw new Error('Upload failed');
+      if(response.ok){
+        toast({
+          title: "File Uploaded",
+          description: `Your Video has been uploaded sucessfully`,
+        })
+      }
 
       onUploadComplete();
       form.reset();
@@ -85,6 +92,11 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
 
     } catch (error) {
       console.error('Error uploading file:', error);
+      toast({
+        variant: "destructive",
+        title: "Error Uploading File",
+        description: `Try to upload a video less than 4 MB. Please try again.`,
+      })
       form.setError('root', {
         type: 'manual',
         message: 'Upload failed. Please try again.'
@@ -97,13 +109,14 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md"> {/* Minimized width */}
-        <FormField
+      <FormField
           control={form.control}
           name="file"
           rules={{ 
             required: 'File is required',
             validate: (value) => {
               if (!value) return 'File is required';
+              if (value.type !== 'video/mp4') return 'Only MP4 files are allowed';
               return true;
             }
           }}
@@ -127,7 +140,7 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
                             id="file-upload"
                             type="file"
                             className="sr-only"
-                            accept="video/*"
+                            accept="video/mp4"
                             onChange={(e) => {
                               const file = e.target.files?.[0] || null;
                               handleFileChange(file);
@@ -137,7 +150,7 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
                         </label>
                         <p className="pl-1">or drag and drop</p>
                       </div>
-                      <p className="text-xs leading-5 text-gray-600">MP4, WebM, or Ogg up to 10GB</p>
+                      <p className="text-xs leading-5 text-gray-600">MP4 up to 4MB</p>
                     </div>
                   ) : (
                     <div className="relative">
@@ -163,6 +176,7 @@ export function UploadForm({ courseId, folderId, onUploadComplete, onCancel }: U
             </FormItem>
           )}
         />
+
 
 
         <FormField

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useUser } from "@/hooks/useUser";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [courses, setCourses] = useState<Courses[]>([]);
@@ -16,6 +17,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { accessToken } = useUser();
+  const { toast } = useToast();
 
   const fetchCourses = async () => {
     try {
@@ -48,6 +50,11 @@ export default function Home() {
   };
 
   const handleCourseAdded = () => {
+    toast({
+      title: "Course Added",
+      description: `Your Course Has Been Added`,
+      duration: 2000,
+    })
     fetchCourses();
   };
 

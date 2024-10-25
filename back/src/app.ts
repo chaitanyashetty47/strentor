@@ -9,7 +9,7 @@ import { setUserMiddleware } from './middleware/auth';
 const app = express();
 
 app.use(cors({
-  origin: ['https://strentor-frontend.vercel.app', 'https://course.thechaicoder.com', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: ['https://course.thechaicoder.com','https://strentor-frontend.vercel.app', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }))

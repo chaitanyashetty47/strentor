@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Folders } from "@/types/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Folder, MoreVertical, Trash, Edit, Loader2 } from 'lucide-react';
+import { Video, MoreVertical, Trash, Edit, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,6 +9,7 @@ import axios from 'axios';
 import UpdateContentForm from "@/components/adminupload/UpdateContentForm";
 import { useUser } from "@/hooks/useUser";
 import { BACKEND_URL } from "@/lib/config";
+import { useToast } from '@/hooks/use-toast';
 
 interface FolderCardProps {
   folder: Folders;
@@ -17,11 +18,12 @@ interface FolderCardProps {
   onUpdate?: () => void;
 }
 
-export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardProps) {
+export default function SectionCard({ folder, onUpdate }: FolderCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { accessToken } = useUser();
+  const {toast} = useToast();
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -31,11 +33,22 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      if (onDelete) {
-        onDelete();
+      if (onUpdate) {
+        toast({
+          title: "File Deleted",
+          description: `Your Video has been deleted sucessfully`,
+          duration: 2000,
+        })
+        onUpdate();
       }
       setIsDeleteDialogOpen(false);
     } catch (error) {
+      toast({
+        variant:"destructive",
+        title: "File Cannot Be Deleted",
+        description: `Your Video cannot be deleted. Please Try Again Later!`,
+        duration: 2000,
+      })
       console.error("Error deleting folder:", error);
     } finally {
       setIsDeleting(false);
@@ -49,14 +62,14 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
         <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-white/20 to-transparent rounded-bl-full" />
         
         <div className="relative z-10">
-          <p className="text-sm mb-2">Strentor</p>
+          <p className="text-sm mb-2">Courshala</p>
           <h2 className="text-xl font-bold mb-4">{folder.title}</h2>
           <p className="text-sm">{folder.description}</p>
         </div>
       </CardContent>
 
       <div className="bg-purple-900 p-4 flex justify-between items-center">
-        <Folder />
+        <Video />
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -115,6 +128,11 @@ export default function SectionCard({ folder, onDelete, onUpdate }: FolderCardPr
             }}
             onUpdateComplete={() => {
               setIsUpdateModalOpen(false);
+              toast({
+                title: "File Updated",
+                description: `Your Video has been updatged sucessfully`,
+                duration: 2000,
+              })
               if (onUpdate) onUpdate();
             }}
             onCancel={() => setIsUpdateModalOpen(false)}

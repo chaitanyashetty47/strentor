@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from  '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User } from 'lucide-react';
 import { Courses } from "@/types/types";
-import { User } from "@/types/types";
+import { User as UserType } from "@/types/types";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { BACKEND_URL } from "@/lib/config";
@@ -12,7 +12,7 @@ import { useUser } from '@/hooks/useUser';
 
 interface CourseDeetsProps {
   course: Courses;
-  tutor?: User;
+  tutor?: UserType;
   tutorLoading: boolean;
   isEnrolled: boolean;
   loading: boolean;
@@ -22,14 +22,14 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
   const navigate = useNavigate();
   const [joining, setJoining] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const {user , accessToken} = useUser();
-
+  const { user, accessToken } = useUser();
   const userId = user?.id;
+  const [avatarError, setAvatarError] = useState(false);
 
   const handleJoinCourse = async () => {
     try {
       setJoining(true);
-  
+
       // Implement the API call to join the course
       const response = await axios.post(
         `${BACKEND_URL}/purchases/course/${course.id}/join`,
@@ -43,7 +43,7 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
           },
         }
       );
-  
+
       if (response.status === 201) { // Use 201 for successful creation
         // Handle success (e.g., reload the page or update UI)
         console.log(`Successfully joined the course: ${course.title}`);
@@ -56,7 +56,6 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
       setShowDialog(false); // Close the dialog after attempting the join
     }
   };
-  
 
   return (
     <div className="flex gap-8 max-w-4xl p-6">
@@ -79,7 +78,16 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
 
         {!tutorLoading && tutor && (
           <div className="flex items-center gap-2 mt-4">
-            <img src={tutor.avatarUrl} alt={tutor.name} className="w-12 h-12 rounded-full" />
+            {avatarError || !tutor.avatarUrl ? (
+              <User className="w-12 h-12 text-gray-400 bg-gray-200 rounded-full" />
+            ) : (
+              <img
+                src={tutor.avatarUrl}
+                alt={tutor.name}
+                className="w-12 h-12 rounded-full"
+                onError={() => setAvatarError(true)} // Set error state if image fails to load
+              />
+            )}
             <div>
               <h3 className="text-lg font-semibold">
                 {tutor.name.charAt(0).toUpperCase() + tutor.name.slice(1)}
@@ -90,22 +98,22 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
         )}
 
         <div className="mt-6 pt-3">
-        <Button
-  onClick={() => {
-    if (isEnrolled) {
-      // Navigate directly to course content if the user is enrolled
-      navigate(`/course/${course.id}/detail`);
-    } else {
-      // Show the dialog to join the course if the user is not enrolled
-      setShowDialog(true);
-    }
-  }}
-  disabled={loading || joining}
-  className={`px-4 py-2 font-semibold rounded-md transition ${
-    isEnrolled || loading || joining
-      ? "bg-gray-400 "
-      : "bg-purple-600 text-white hover:bg-purple-700"
-  }`}
+          <Button
+            onClick={() => {
+              if (isEnrolled) {
+                // Navigate directly to course content if the user is enrolled
+                navigate(`/course/${course.id}/detail`);
+              } else {
+                // Show the dialog to join the course if the user is not enrolled
+                setShowDialog(true);
+              }
+            }}
+            disabled={loading || joining}
+            className={`px-4 py-2 font-semibold rounded-md transition ${
+              isEnrolled || loading || joining
+                ? "bg-gray-400 "
+                : "bg-purple-600 text-white hover:bg-purple-700"
+            }`}
           >
             {loading || joining ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -115,7 +123,6 @@ const CourseDeets = ({ course, tutor, tutorLoading, isEnrolled, loading }: Cours
               "Join Course"
             )}
           </Button>
-
         </div>
 
         {/* Confirmation Dialog */}

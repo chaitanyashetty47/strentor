@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface CoursesCardProps {
   course: Courses;
@@ -36,6 +37,7 @@ export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false); // New loading state for delete
   const { accessToken } = useUser();
+  const { toast } = useToast();
 
   const handleDelete = async (e:any) => {
     e.stopPropagation();
@@ -47,12 +49,26 @@ export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) 
         },
       });
       if (onUpdate) {
-        onUpdate();
+        toast({
+          title: "Success",
+          description: "Your course has been deleted",
+          duration:2000,
+       
+        });
+        onUpdate(); 
       }
       setIsDeleteDialogOpen(false);
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error Deleting Course. Please Try Again Later!",
+        duration:2000,
+     
+      });
       console.error("Error deleting course:", error);
     } finally {
+     
       setIsDeleting(false); // Stop loading
     }
   };
@@ -178,6 +194,11 @@ export default function AdminCourseCard({ course, onUpdate }: CoursesCardProps) 
               }}
               onUpdateComplete={() => {
                 setIsUpdateModalOpen(false);
+                toast({
+                  title: "Course Updated",
+                  description: "Your course has been updated",
+                  duration:2000,
+                });
                 if (onUpdate) onUpdate();
               }}
               onCancel={() => setIsUpdateModalOpen(false)}

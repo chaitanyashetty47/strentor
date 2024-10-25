@@ -60,12 +60,14 @@ const UpdateFolderForm = ({ folder, onClose, onFolderUpdated }: UpdateFolderForm
         toast({
           title: "Success!",
           description: "Folder updated successfully.",
+          duration:2000,        
         });
       } else {
         toast({
           variant: "destructive",
           title: "Update Failed",
           description: "There was a problem updating the folder.",
+          duration:2000, 
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }

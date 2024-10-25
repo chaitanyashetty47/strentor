@@ -115,6 +115,7 @@ export default function Auth() {
         variant: "destructive",
         title: "Error",
         description: error.message || `Failed to ${isSignUp ? 'sign up' : 'sign in'}. Please try again.`,
+        duration: 2000,
       })
     } finally {
       setIsLoading(false)

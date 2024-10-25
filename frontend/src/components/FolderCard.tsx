@@ -9,6 +9,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { useUser } from "@/hooks/useUser";
 import { BACKEND_URL } from '@/lib/config';
+import { useToast } from '@/hooks/use-toast';
 
 interface FolderCardProps {
   folder: Folders;
@@ -21,6 +22,7 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false); // State for loading spinner
   const { accessToken } = useUser();
+  const {toast} = useToast();
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -31,10 +33,21 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
         },
       });
       if (onDelete) {
+        toast({
+          title: "File Deleted",
+          description: `Your Video has been deleted sucessfully`,
+          duration: 2000,
+        })
         onDelete();
       }
       setIsDeleteDialogOpen(false);
     } catch (error) {
+      toast({
+        variant:"destructive",
+        title: "File Cannot Be Deleted",
+        description: `Your Folder cannot be deleted. Please Try Again Later!`,
+        duration: 2000,
+      })
       console.error("Error deleting folder:", error);
     } finally {
       setIsDeleting(false);
@@ -49,7 +62,7 @@ export default function FolderCard({ folder, onDelete, onUpdate, courseId }: Fol
           <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-white/20 to-transparent rounded-bl-full" />
 
           <div className="relative z-10">
-            <p className="text-sm mb-2">Strentor</p>
+            <p className="text-sm mb-2">Courshala</p>
             <h2 className="text-xl font-bold mb-4">{folder.title}</h2>
             <p className="text-sm">{folder.description}</p>
           </div>

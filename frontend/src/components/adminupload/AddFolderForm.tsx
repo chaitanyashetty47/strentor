@@ -48,6 +48,7 @@ const AddFolderForm = ({ onClose, onCourseAdded }: AddFolderFormProps) => {
         toast({
           title: "Success!",
           description: "Course created successfully.",
+          duration:2000,
         })
       } else {
         console.error('Failed to add folder');
@@ -55,6 +56,7 @@ const AddFolderForm = ({ onClose, onCourseAdded }: AddFolderFormProps) => {
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
           description: "There was a problem with your request.",
+          duration:2000,
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         })
         onClose();
@@ -66,6 +68,7 @@ const AddFolderForm = ({ onClose, onCourseAdded }: AddFolderFormProps) => {
         variant: "destructive",
         title: "Error",
         description: "An unexpected error occurred.",
+        duration:2000,
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
       onClose();

@@ -8,11 +8,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { BACKEND_URL } from "@/lib/config";
 import { useUser } from '@/hooks/useUser';
-import { Loader2, Upload, Trash2} from "lucide-react";
+import { Loader2, Upload, Trash2 } from "lucide-react";
 
 interface AddCourseFormProps {
   onClose: () => void;
@@ -25,18 +25,25 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null); // State to track file errors
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setFileError(null); // Clear any existing file error
+    } else {
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setFileError('Please select a valid JPG or PNG image.'); // Set file error message
     }
   };
-
+  
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
+    setFileError(null); // Clear any existing file error
   };
 
   const onSubmit = async (data: any) => {
@@ -118,11 +125,12 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-purple-500 transition-colors">
             <Input
               type="file"
-              accept="image/*"
+              accept="image/png, image/jpeg" // Restrict to only PNG and JPEG files
               onChange={handleFileChange}
               className="hidden"
               id="thumbnail-input"
             />
+
             <label 
               htmlFor="thumbnail-input" 
               className="flex flex-col items-center gap-2 cursor-pointer"
@@ -132,7 +140,7 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
                 Add course thumbnail
               </span>
               <span className="text-xs text-gray-400">
-                SVG, PNG, JPG or GIF (max. 2MB)
+                JPG or PNG (max. 2MB)
               </span>
             </label>
           </div>
@@ -162,11 +170,12 @@ const AddCourseForm = ({ onClose, onCourseAdded }: AddCourseFormProps) => {
                 Change thumbnail
               </label>
               <span className="text-xs text-gray-400">
-                SVG, PNG, JPG or GIF (max. 2MB)
+                JPG or PNG (max. 2MB)
               </span>
             </div>
           </div>
         )}
+        {fileError && <span className="text-red-500">{fileError}</span>} {/* Display file error */}
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">

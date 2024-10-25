@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Import a Textarea component for description
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Import Select components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import { BACKEND_URL } from "@/lib/config";
 import { useUser } from "@/hooks/useUser";
+import { useToast } from "@/hooks/use-toast";
 
 interface UpdateCourseFormProps {
   courseId: number;
@@ -30,6 +32,7 @@ interface FormValues {
 export default function UpdateCourseForm({ courseId, initialData, onUpdateComplete, onCancel }: UpdateCourseFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { accessToken } = useUser();
+  const {toast} = useToast(); 
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -65,6 +68,15 @@ export default function UpdateCourseForm({ courseId, initialData, onUpdateComple
       });
 
       if (!response.ok) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An unexpected error occurred.",
+          duration:2000,
+       
+        });
+
+       
         throw new Error('Update failed');
       }
 
@@ -127,7 +139,7 @@ export default function UpdateCourseForm({ courseId, initialData, onUpdateComple
           )}
         />
 
-        {/* Level Field */}
+        {/* Level Field (Select) */}
         <FormField
           control={form.control}
           name="level"
@@ -136,7 +148,19 @@ export default function UpdateCourseForm({ courseId, initialData, onUpdateComple
             <FormItem>
               <FormLabel>Level *</FormLabel>
               <FormControl>
-                <Input placeholder="Enter level" {...field} />
+                <Select
+                  onValueChange={(value) => field.onChange(value)}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Beginner">Beginner</SelectItem>
+                    <SelectItem value="Intermediate">Intermediate</SelectItem>
+                    <SelectItem value="Advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
